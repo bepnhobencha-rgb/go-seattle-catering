@@ -15,13 +15,13 @@ cd "$(dirname "$0")/.."
 echo "▶ Backing up current SQLite schema → scripts/schema.sqlite.prisma"
 cp prisma/schema.prisma scripts/schema.sqlite.prisma
 
-echo "▶ Switching datasource to postgresql"
+echo "▶ Switching datasource to postgresql (Neon-compatible env var names)"
 # Replace the sqlite block with postgres
 cat > /tmp/pg_block.txt <<'EOF'
 datasource db {
   provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 EOF
 
