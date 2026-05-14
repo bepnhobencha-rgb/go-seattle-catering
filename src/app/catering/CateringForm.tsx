@@ -2,16 +2,21 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { EVENT_TYPES, EVENT_TYPE_LABEL, SERVICE_STYLES, SERVICE_STYLE_LABEL, BUDGET_RANGES } from "@/lib/enums";
+import { EVENT_TYPES, SERVICE_STYLES, BUDGET_RANGES, eventTypeLabel, serviceStyleLabel } from "@/lib/enums";
 import { toast } from "@/components/Toaster";
 import { ArrowRight } from "lucide-react";
+import type { Dict, Lang } from "@/lib/i18n";
 
 export function CateringForm({
   minGuests = 10,
   maxGuests = 1000,
+  t,
+  lang,
 }: {
   minGuests?: number;
   maxGuests?: number;
+  t: Dict;
+  lang: Lang;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -38,11 +43,11 @@ export function CateringForm({
         body: JSON.stringify(form),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to submit");
-      toast("Request sent! We'll be in touch soon.", "success");
+      if (!res.ok) throw new Error(data.error || t.toastSomethingWrong);
+      toast(t.toastRequestSent, "success");
       router.push(`/catering/success?n=${data.requestNumber}`);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Something went wrong";
+      const msg = err instanceof Error ? err.message : t.toastSomethingWrong;
       toast(msg, "error");
       setLoading(false);
     }
@@ -52,29 +57,29 @@ export function CateringForm({
     <form onSubmit={onSubmit} className="space-y-5">
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className="label-dark">Event type *</label>
+          <label className="label-dark">{t.cateringEventType} *</label>
           <select
             value={form.eventType}
             onChange={(e) => setForm({ ...form, eventType: e.target.value })}
             className="input-dark"
           >
-            {EVENT_TYPES.map((t) => (
-              <option key={t} value={t} className="bg-ink-800">
-                {EVENT_TYPE_LABEL[t]}
+            {EVENT_TYPES.map((et) => (
+              <option key={et} value={et} className="bg-ink-800">
+                {eventTypeLabel(et, lang)}
               </option>
             ))}
           </select>
         </div>
         <div>
-          <label className="label-dark">Service style *</label>
+          <label className="label-dark">{t.cateringServiceStyle} *</label>
           <select
             value={form.serviceStyle}
             onChange={(e) => setForm({ ...form, serviceStyle: e.target.value })}
             className="input-dark"
           >
-            {SERVICE_STYLES.map((s) => (
-              <option key={s} value={s} className="bg-ink-800">
-                {SERVICE_STYLE_LABEL[s]}
+            {SERVICE_STYLES.map((ss) => (
+              <option key={ss} value={ss} className="bg-ink-800">
+                {serviceStyleLabel(ss, lang)}
               </option>
             ))}
           </select>
@@ -83,7 +88,7 @@ export function CateringForm({
 
       <div className="grid sm:grid-cols-3 gap-4">
         <div>
-          <label className="label-dark">Event date *</label>
+          <label className="label-dark">{t.cateringEventDate} *</label>
           <input
             required
             type="date"
@@ -94,7 +99,7 @@ export function CateringForm({
           />
         </div>
         <div>
-          <label className="label-dark">Start time *</label>
+          <label className="label-dark">{t.cateringStartTime} *</label>
           <input
             required
             type="time"
@@ -104,7 +109,7 @@ export function CateringForm({
           />
         </div>
         <div>
-          <label className="label-dark">Guests *</label>
+          <label className="label-dark">{t.cateringGuests} *</label>
           <input
             required
             type="number"
@@ -118,13 +123,13 @@ export function CateringForm({
       </div>
 
       <div>
-        <label className="label-dark">Budget range (optional)</label>
+        <label className="label-dark">{t.cateringBudget}</label>
         <select
           value={form.budgetRange}
           onChange={(e) => setForm({ ...form, budgetRange: e.target.value })}
           className="input-dark"
         >
-          <option value="" className="bg-ink-800">Not sure / open</option>
+          <option value="" className="bg-ink-800">{t.cateringBudgetOpen}</option>
           {BUDGET_RANGES.map((b) => (
             <option key={b} value={b} className="bg-ink-800">{b}</option>
           ))}
@@ -132,22 +137,22 @@ export function CateringForm({
       </div>
 
       <div>
-        <label className="label-dark">Menu requests / dietary needs</label>
+        <label className="label-dark">{t.cateringMenuRequests}</label>
         <textarea
           rows={3}
           value={form.menuRequests}
           onChange={(e) => setForm({ ...form, menuRequests: e.target.value })}
           className="input-dark"
-          placeholder="e.g. vegetarian options, no peanuts, traditional wedding menu…"
+          placeholder={t.cateringMenuPlaceholder}
         />
       </div>
 
       <div className="divider-gold" />
 
-      <h3 className="font-display text-lg font-bold text-gold-200">Contact info</h3>
+      <h3 className="font-display text-lg font-bold text-gold-200">{t.cateringContactInfo}</h3>
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className="label-dark">Your name *</label>
+          <label className="label-dark">{t.cateringYourName} *</label>
           <input
             required
             value={form.customerName}
@@ -156,7 +161,7 @@ export function CateringForm({
           />
         </div>
         <div>
-          <label className="label-dark">Phone *</label>
+          <label className="label-dark">{t.contactPhone} *</label>
           <input
             required
             type="tel"
@@ -167,7 +172,7 @@ export function CateringForm({
         </div>
       </div>
       <div>
-        <label className="label-dark">Email *</label>
+        <label className="label-dark">{t.contactEmail} *</label>
         <input
           required
           type="email"
@@ -178,11 +183,9 @@ export function CateringForm({
       </div>
 
       <button disabled={loading} className="btn-gold w-full disabled:opacity-60">
-        {loading ? "Submitting…" : "Submit request"} <ArrowRight className="w-4 h-4" />
+        {loading ? t.cateringSubmitting : t.cateringSubmitRequest} <ArrowRight className="w-4 h-4" />
       </button>
-      <p className="text-xs text-cream/55 text-center">
-        We&apos;ll reply within 24–48 hours with a custom quote.
-      </p>
+      <p className="text-xs text-cream/55 text-center">{t.cateringReplyTime}</p>
     </form>
   );
 }

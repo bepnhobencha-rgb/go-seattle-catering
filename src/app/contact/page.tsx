@@ -2,32 +2,32 @@ import { maintenanceGate } from "@/lib/maintenance";
 import { Globe, Mail, MapPin, Phone, Clock, ExternalLink } from "lucide-react";
 import { ContactForm } from "./ContactForm";
 import { AnimateIn } from "@/components/AnimateIn";
+import { dict } from "@/lib/i18n";
+import { getLang } from "@/lib/i18n-server";
 
 export const metadata = {
   title: "Contact — Gõ Seattle Catering",
 };
 
 export default async function ContactPage() {
-  const s = await maintenanceGate();
+  const [s, lang] = await Promise.all([maintenanceGate(), getLang()]);
+  const t = dict[lang];
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
       <AnimateIn>
         <div className="text-center mb-12">
-          <p className="eyebrow">Get in touch</p>
+          <p className="eyebrow">{t.contactEyebrow}</p>
           <h1 className="font-display text-5xl sm:text-6xl font-bold mt-3">
-            We&apos;d <span className="text-gold-gradient">love to hear</span> from you
+            {t.contactTitle} <span className="text-gold-gradient">{t.contactTitleAccent}</span> {t.contactTitleEnd}
           </h1>
-          <p className="mt-4 text-cream/70 max-w-2xl mx-auto">
-            Questions about an order? Planning a special event? Let&apos;s talk.
-          </p>
+          <p className="mt-4 text-cream/70 max-w-2xl mx-auto">{t.contactSubtitle}</p>
         </div>
       </AnimateIn>
 
       <div className="grid lg:grid-cols-2 gap-10">
-        {/* Info column */}
         <AnimateIn className="space-y-5">
           <div className="card p-6">
-            <h2 className="font-display text-xl font-bold text-gold-200 mb-4">Visit us</h2>
+            <h2 className="font-display text-xl font-bold text-gold-200 mb-4">{t.contactVisitUs}</h2>
             <ul className="space-y-3 text-cream/80 text-sm">
               {s.address && (
                 <li className="flex gap-3">
@@ -66,7 +66,7 @@ export default async function ContactPage() {
 
           <div className="card p-6">
             <h2 className="font-display text-xl font-bold text-gold-200 mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5" /> Hours
+              <Clock className="w-5 h-5" /> {t.contactHours}
             </h2>
             <ul className="space-y-2 text-sm">
               {s.hours.map((h) => (
@@ -90,11 +90,10 @@ export default async function ContactPage() {
           </div>
         </AnimateIn>
 
-        {/* Form column */}
         <AnimateIn delay={100}>
           <div className="card p-6 lg:p-8 border-gold-500/30">
-            <h2 className="font-display text-xl font-bold text-gold-200 mb-4">Send a message</h2>
-            <ContactForm />
+            <h2 className="font-display text-xl font-bold text-gold-200 mb-4">{t.contactSendMessage}</h2>
+            <ContactForm t={t} />
           </div>
         </AnimateIn>
       </div>

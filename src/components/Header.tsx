@@ -4,22 +4,34 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X, ShoppingBag, User } from "lucide-react";
 import { Logo } from "./Logo";
+import { LanguageToggle } from "./LanguageToggle";
 import { useCart } from "@/lib/cart-store";
+import type { Dict, Lang } from "@/lib/i18n";
 
-const NAV = [
-  { href: "/menu", label: "Menu" },
-  { href: "/catering", label: "Catering" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-];
-
-export function Header({ logo, brandName }: { logo?: string; brandName?: string }) {
+export function Header({
+  logo,
+  brandName,
+  lang,
+  t,
+}: {
+  logo?: string;
+  brandName?: string;
+  lang: Lang;
+  t: Dict;
+}) {
   const [open, setOpen] = useState(false);
   const count = useCart((s) => s.items.reduce((n, i) => n + i.qty, 0));
 
+  const NAV = [
+    { href: "/menu", label: t.navMenu },
+    { href: "/catering", label: t.navCatering },
+    { href: "/about", label: t.navAbout },
+    { href: "/contact", label: t.navContact },
+  ];
+
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-ink-900/85 border-b border-gold-900/40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
         <Logo src={logo} brandName={brandName} />
 
         <nav className="hidden md:flex items-center gap-7">
@@ -35,6 +47,7 @@ export function Header({ logo, brandName }: { logo?: string; brandName?: string 
         </nav>
 
         <div className="flex items-center gap-2">
+          <LanguageToggle lang={lang} otherLabel={t.langLabel} />
           <Link
             href="/cart"
             className="relative p-2 rounded-full hover:bg-gold-500/10 transition-colors"
@@ -50,7 +63,7 @@ export function Header({ logo, brandName }: { logo?: string; brandName?: string 
           <Link
             href="/account"
             className="hidden sm:inline-flex p-2 rounded-full hover:bg-gold-500/10 transition-colors"
-            aria-label="Account"
+            aria-label={t.navAccount}
           >
             <User className="w-5 h-5 text-gold-300" />
           </Link>
@@ -82,7 +95,7 @@ export function Header({ logo, brandName }: { logo?: string; brandName?: string 
               onClick={() => setOpen(false)}
               className="px-3 py-2 rounded-md text-cream/90 hover:bg-gold-500/10 hover:text-gold-300"
             >
-              Account
+              {t.navAccount}
             </Link>
           </div>
         </div>

@@ -4,15 +4,20 @@ import { useCart } from "@/lib/cart-store";
 import { formatUSD, calcTax } from "@/lib/utils";
 import Link from "next/link";
 import { Minus, Plus, Trash2, ArrowRight, ShoppingBag } from "lucide-react";
+import type { Dict, Lang } from "@/lib/i18n";
 
 export function CartView({
   taxRate,
   taxLabel,
   stripeEnabled,
+  t,
+  lang,
 }: {
   taxRate: number;
   taxLabel: string;
   stripeEnabled: boolean;
+  t: Dict;
+  lang: Lang;
 }) {
   const items = useCart((s) => s.items);
   const updateQty = useCart((s) => s.updateQty);
@@ -26,9 +31,9 @@ export function CartView({
     return (
       <div className="max-w-3xl mx-auto px-4 py-24 text-center">
         <ShoppingBag className="w-16 h-16 text-gold-500/50 mx-auto" />
-        <h1 className="font-display text-3xl mt-4">Your cart is empty</h1>
-        <p className="text-cream/60 mt-2">Add some delicious dishes to get started.</p>
-        <Link href="/menu" className="btn-gold mt-6">Browse menu</Link>
+        <h1 className="font-display text-3xl mt-4">{t.cartEmpty}</h1>
+        <p className="text-cream/60 mt-2">{t.cartEmptySubtitle}</p>
+        <Link href="/menu" className="btn-gold mt-6">{t.browseMenu}</Link>
       </div>
     );
   }
@@ -36,7 +41,7 @@ export function CartView({
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="font-display text-4xl sm:text-5xl font-bold">
-        Your <span className="text-gold-gradient">cart</span>
+        {t.cartTitle} <span className="text-gold-gradient">{t.cartTitleAccent}</span>
       </h1>
 
       <div className="mt-8 grid lg:grid-cols-3 gap-8">
@@ -50,13 +55,19 @@ export function CartView({
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       {line.code && <p className="text-xs text-gold-500/80 font-mono">{line.code}</p>}
-                      <h3 className="font-display text-lg font-bold text-cream">{line.nameEn}</h3>
-                      {line.nameVn && <p className="text-sm text-gold-300/70 italic">{line.nameVn}</p>}
+                      <h3 className="font-display text-lg font-bold text-cream">
+                        {lang === "vn" && line.nameVn ? line.nameVn : line.nameEn}
+                      </h3>
+                      {(lang === "vn" ? line.nameEn : line.nameVn) && (
+                        <p className="text-sm text-gold-300/70 italic">
+                          {lang === "vn" ? line.nameEn : line.nameVn}
+                        </p>
+                      )}
                     </div>
                     <button
                       onClick={() => remove(line.id)}
                       className="text-cream/50 hover:text-red-400"
-                      aria-label="Remove"
+                      aria-label={t.cartRemove}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -97,10 +108,10 @@ export function CartView({
 
         {/* Summary */}
         <aside className="card p-6 h-fit lg:sticky lg:top-24">
-          <h2 className="font-display text-xl font-bold text-gold-200">Order summary</h2>
+          <h2 className="font-display text-xl font-bold text-gold-200">{t.cartOrderSummary}</h2>
           <div className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between text-cream/80">
-              <span>Subtotal</span>
+              <span>{t.cartSubtotal}</span>
               <span>{formatUSD(subtotal)}</span>
             </div>
             <div className="flex justify-between text-cream/80">
@@ -109,20 +120,18 @@ export function CartView({
             </div>
             <div className="divider-gold my-3" />
             <div className="flex justify-between text-lg font-display font-bold">
-              <span className="text-cream">Total</span>
+              <span className="text-cream">{t.cartTotal}</span>
               <span className="text-gold-300">{formatUSD(total)}</span>
             </div>
           </div>
           <p className="mt-4 text-xs text-cream/60">
-            {stripeEnabled
-              ? "💳 Pay online with credit/debit card · Made-to-order items take 10–15 minutes."
-              : "💵 Payment at pickup · Made-to-order items take 10–15 minutes."}
+            {stripeEnabled ? t.cartPaymentOnline : t.cartPaymentPickup}
           </p>
           <Link href="/checkout" className="btn-gold w-full mt-5">
-            Checkout <ArrowRight className="w-4 h-4" />
+            {t.cartCheckout} <ArrowRight className="w-4 h-4" />
           </Link>
           <Link href="/menu" className="block text-center mt-3 text-sm text-gold-300 hover:text-gold-200">
-            ← Continue shopping
+            ← {t.continueShopping}
           </Link>
         </aside>
       </div>

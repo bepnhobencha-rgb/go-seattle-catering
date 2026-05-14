@@ -6,8 +6,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { toast } from "@/components/Toaster";
 import { ArrowRight } from "lucide-react";
+import type { Dict } from "@/lib/i18n";
 
-export function LoginForm() {
+export function LoginForm({ t }: { t: Dict }) {
   const params = useSearchParams();
   const callbackUrl = params.get("callbackUrl") || "/account";
   const [loading, setLoading] = useState(false);
@@ -16,8 +17,6 @@ export function LoginForm() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-
-    // First, validate credentials without redirecting so we can show an inline error.
     const check = await signIn("credentials", {
       email: form.email,
       password: form.password,
@@ -26,14 +25,10 @@ export function LoginForm() {
 
     if (check?.error) {
       setLoading(false);
-      toast("Invalid email or password", "error");
+      toast(t.authInvalidLogin, "error");
       return;
     }
-
-    // Credentials valid — perform a full-page redirect so the new session cookie
-    // is read by middleware on the next request (avoids the App Router state
-    // race that can leave you on the login page after router.push).
-    toast("Welcome back!", "success");
+    toast(t.authWelcomeToast, "success");
     window.location.assign(callbackUrl || "/account");
   }
 
@@ -41,7 +36,7 @@ export function LoginForm() {
     <>
       <form onSubmit={onSubmit} className="mt-8 card p-6 space-y-4">
         <div>
-          <label className="label-dark">Email</label>
+          <label className="label-dark">{t.contactEmail}</label>
           <input
             required
             type="email"
@@ -51,7 +46,7 @@ export function LoginForm() {
           />
         </div>
         <div>
-          <label className="label-dark">Password</label>
+          <label className="label-dark">{t.authPassword}</label>
           <input
             required
             type="password"
@@ -61,14 +56,14 @@ export function LoginForm() {
           />
         </div>
         <button disabled={loading} className="btn-gold w-full disabled:opacity-60">
-          {loading ? "Signing in…" : "Sign in"} <ArrowRight className="w-4 h-4" />
+          {loading ? t.authSigningIn : t.authSignIn} <ArrowRight className="w-4 h-4" />
         </button>
       </form>
 
       <p className="text-center text-sm text-cream/70 mt-5">
-        Don&apos;t have an account?{" "}
+        {t.authNoAccount}{" "}
         <Link href="/auth/register" className="text-gold-300 hover:text-gold-200 font-semibold">
-          Sign up
+          {t.authSignUp}
         </Link>
       </p>
     </>

@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { ArrowRight, ShoppingBag, CreditCard, Banknote } from "lucide-react";
 import { toast } from "@/components/Toaster";
+import { interpolate, type Dict, type Lang } from "@/lib/i18n";
 
 type Props = {
   taxRate: number;
@@ -15,9 +16,11 @@ type Props = {
   minPickupMinutes: number;
   maxPickupDays: number;
   stripeEnabled: boolean;
+  t: Dict;
+  lang: Lang;
 };
 
-export function CheckoutForm({ taxRate, taxLabel, minPickupMinutes, maxPickupDays, stripeEnabled }: Props) {
+export function CheckoutForm({ taxRate, taxLabel, minPickupMinutes, maxPickupDays, stripeEnabled, t, lang }: Props) {
   const router = useRouter();
   const { data: session } = useSession();
   const items = useCart((s) => s.items);
@@ -112,16 +115,16 @@ export function CheckoutForm({ taxRate, taxLabel, minPickupMinutes, maxPickupDay
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="font-display text-4xl sm:text-5xl font-bold">
-        <span className="text-gold-gradient">Checkout</span>
+        <span className="text-gold-gradient">{t.checkoutTitle}</span>
       </h1>
 
       <form onSubmit={onSubmit} className="mt-8 grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-5">
           <div className="card p-6 space-y-4">
-            <h2 className="font-display text-xl font-bold text-gold-200">Pickup details</h2>
+            <h2 className="font-display text-xl font-bold text-gold-200">{t.checkoutPickupDetails}</h2>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="label-dark">Full name *</label>
+                <label className="label-dark">{t.checkoutFullName} *</label>
                 <input
                   required
                   value={form.name}
@@ -130,7 +133,7 @@ export function CheckoutForm({ taxRate, taxLabel, minPickupMinutes, maxPickupDay
                 />
               </div>
               <div>
-                <label className="label-dark">Phone *</label>
+                <label className="label-dark">{t.checkoutPhone} *</label>
                 <input
                   required
                   type="tel"
@@ -142,7 +145,7 @@ export function CheckoutForm({ taxRate, taxLabel, minPickupMinutes, maxPickupDay
               </div>
             </div>
             <div>
-              <label className="label-dark">Email *</label>
+              <label className="label-dark">{t.checkoutEmail} *</label>
               <input
                 required
                 type="email"
@@ -152,7 +155,7 @@ export function CheckoutForm({ taxRate, taxLabel, minPickupMinutes, maxPickupDay
               />
             </div>
             <div>
-              <label className="label-dark">Pickup time *</label>
+              <label className="label-dark">{t.checkoutPickupTime} *</label>
               <input
                 required
                 type="datetime-local"
@@ -163,11 +166,11 @@ export function CheckoutForm({ taxRate, taxLabel, minPickupMinutes, maxPickupDay
                 max={maxAttr}
               />
               <p className="text-xs text-cream/55 mt-1">
-                Earliest pickup: {minPickupMinutes} minutes from now · Up to {maxPickupDays} days ahead
+                {interpolate(t.checkoutEarliest, { min: minPickupMinutes, days: maxPickupDays })}
               </p>
             </div>
             <div>
-              <label className="label-dark">Order notes (optional)</label>
+              <label className="label-dark">{t.checkoutNotes}</label>
               <textarea
                 rows={2}
                 value={form.notes}
@@ -178,7 +181,7 @@ export function CheckoutForm({ taxRate, taxLabel, minPickupMinutes, maxPickupDay
           </div>
 
           <div className="card p-6">
-            <h2 className="font-display text-xl font-bold text-gold-200 mb-4">Payment</h2>
+            <h2 className="font-display text-xl font-bold text-gold-200 mb-4">{t.checkoutPayment}</h2>
             {stripeEnabled ? (
               <div className="grid sm:grid-cols-2 gap-3">
                 <label
@@ -198,8 +201,8 @@ export function CheckoutForm({ taxRate, taxLabel, minPickupMinutes, maxPickupDay
                   <div className="flex items-center gap-3">
                     <CreditCard className="w-6 h-6 text-gold-400" />
                     <div>
-                      <p className="font-semibold text-cream">Card online</p>
-                      <p className="text-xs text-cream/60">Pay now via Stripe</p>
+                      <p className="font-semibold text-cream">{t.checkoutCardOnline}</p>
+                      <p className="text-xs text-cream/60">{t.checkoutCardOnlineDesc}</p>
                     </div>
                   </div>
                 </label>
@@ -220,15 +223,15 @@ export function CheckoutForm({ taxRate, taxLabel, minPickupMinutes, maxPickupDay
                   <div className="flex items-center gap-3">
                     <Banknote className="w-6 h-6 text-gold-400" />
                     <div>
-                      <p className="font-semibold text-cream">Pay at pickup</p>
-                      <p className="text-xs text-cream/60">Cash or card in store</p>
+                      <p className="font-semibold text-cream">{t.checkoutPayAtPickup}</p>
+                      <p className="text-xs text-cream/60">{t.checkoutPayAtPickupDesc}</p>
                     </div>
                   </div>
                 </label>
               </div>
             ) : (
               <div className="p-4 rounded-lg bg-gold-500/10 border border-gold-500/30 text-sm text-gold-100">
-                💵 <strong>Pay at pickup</strong> — cash or card accepted in store.
+                {t.checkoutPayInfoOnly}
               </div>
             )}
           </div>
@@ -236,17 +239,18 @@ export function CheckoutForm({ taxRate, taxLabel, minPickupMinutes, maxPickupDay
 
         {/* Summary */}
         <aside className="card p-6 h-fit lg:sticky lg:top-24">
-          <h2 className="font-display text-xl font-bold text-gold-200">Order summary</h2>
+          <h2 className="font-display text-xl font-bold text-gold-200">{t.cartOrderSummary}</h2>
           <ul className="mt-3 space-y-2 text-sm max-h-60 overflow-y-auto">
             {items.map((i) => {
-              const topT = i.toppings.reduce((s, t) => s + t.price, 0);
+              const topT = i.toppings.reduce((s, top) => s + top.price, 0);
+              const itemName = lang === "vn" && i.nameVn ? i.nameVn : i.nameEn;
               return (
                 <li key={i.id} className="flex justify-between gap-2">
                   <span className="text-cream/80">
-                    {i.qty}× {i.nameEn}
+                    {i.qty}× {itemName}
                     {i.toppings.length > 0 && (
                       <span className="block text-xs text-gold-300/70">
-                        + {i.toppings.map((t) => t.name).join(", ")}
+                        + {i.toppings.map((top) => top.name).join(", ")}
                       </span>
                     )}
                   </span>
@@ -260,7 +264,7 @@ export function CheckoutForm({ taxRate, taxLabel, minPickupMinutes, maxPickupDay
           <div className="divider-gold my-4" />
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-cream/80">
-              <span>Subtotal</span>
+              <span>{t.cartSubtotal}</span>
               <span>{formatUSD(subtotal)}</span>
             </div>
             <div className="flex justify-between text-cream/80">
@@ -268,23 +272,23 @@ export function CheckoutForm({ taxRate, taxLabel, minPickupMinutes, maxPickupDay
               <span>{formatUSD(tax)}</span>
             </div>
             <div className="flex justify-between text-lg font-display font-bold">
-              <span>Total</span>
+              <span>{t.cartTotal}</span>
               <span className="text-gold-300">{formatUSD(total)}</span>
             </div>
           </div>
           <button disabled={loading} className="btn-gold w-full mt-6 disabled:opacity-60">
             {loading
               ? payMethod === "STRIPE"
-                ? "Redirecting…"
-                : "Placing order…"
+                ? t.checkoutRedirecting
+                : t.checkoutPlacing
               : payMethod === "STRIPE"
-              ? "Pay with card"
-              : "Place order"}{" "}
+              ? t.checkoutPayWithCard
+              : t.checkoutPlaceOrder}{" "}
             <ArrowRight className="w-4 h-4" />
           </button>
           {!session && (
             <p className="mt-3 text-xs text-cream/55 text-center">
-              <Link href="/auth/login" className="text-gold-300 hover:underline">Log in</Link> to save your order history (optional)
+              <Link href="/auth/login" className="text-gold-300 hover:underline">{t.checkoutLogin}</Link> {t.checkoutLoginHint}
             </p>
           )}
         </aside>

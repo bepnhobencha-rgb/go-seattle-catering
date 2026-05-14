@@ -1,3 +1,5 @@
+import type { Lang } from "./i18n";
+
 export const ROLE = { CUSTOMER: "CUSTOMER", ADMIN: "ADMIN" } as const;
 
 export const ORDER_STATUSES = [
@@ -10,7 +12,7 @@ export const ORDER_STATUSES = [
 ] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
-export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
+const ORDER_STATUS_LABEL_EN: Record<OrderStatus, string> = {
   PENDING: "Pending",
   CONFIRMED: "Confirmed",
   PREPARING: "Preparing",
@@ -18,6 +20,20 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
   COMPLETED: "Completed",
   CANCELLED: "Cancelled",
 };
+const ORDER_STATUS_LABEL_VN: Record<OrderStatus, string> = {
+  PENDING: "Đang chờ",
+  CONFIRMED: "Đã xác nhận",
+  PREPARING: "Đang chuẩn bị",
+  READY: "Sẵn sàng lấy",
+  COMPLETED: "Hoàn tất",
+  CANCELLED: "Đã huỷ",
+};
+/** Backwards-compatible default (English). */
+export const ORDER_STATUS_LABEL = ORDER_STATUS_LABEL_EN;
+
+export function orderStatusLabel(s: OrderStatus, lang: Lang = "en") {
+  return (lang === "vn" ? ORDER_STATUS_LABEL_VN : ORDER_STATUS_LABEL_EN)[s];
+}
 
 export const ORDER_STATUS_COLOR: Record<OrderStatus, string> = {
   PENDING: "bg-yellow-500/20 text-yellow-300 border-yellow-500/40",
@@ -37,22 +53,44 @@ export const EVENT_TYPES = [
 ] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 
-export const EVENT_TYPE_LABEL: Record<EventType, string> = {
+const EVENT_TYPE_LABEL_EN: Record<EventType, string> = {
   WEDDING: "Wedding",
   PRIVATE_PARTY: "Private Party",
   CORPORATE: "Corporate Event",
   FAMILY: "Family Gathering",
   OTHER: "Other",
 };
+const EVENT_TYPE_LABEL_VN: Record<EventType, string> = {
+  WEDDING: "Đám cưới",
+  PRIVATE_PARTY: "Tiệc riêng",
+  CORPORATE: "Sự kiện doanh nghiệp",
+  FAMILY: "Tiệc gia đình",
+  OTHER: "Khác",
+};
+export const EVENT_TYPE_LABEL = EVENT_TYPE_LABEL_EN;
+
+export function eventTypeLabel(et: EventType, lang: Lang = "en") {
+  return (lang === "vn" ? EVENT_TYPE_LABEL_VN : EVENT_TYPE_LABEL_EN)[et];
+}
 
 export const SERVICE_STYLES = ["BUFFET", "PLATED", "DROPOFF"] as const;
 export type ServiceStyle = (typeof SERVICE_STYLES)[number];
 
-export const SERVICE_STYLE_LABEL: Record<ServiceStyle, string> = {
+const SERVICE_STYLE_LABEL_EN: Record<ServiceStyle, string> = {
   BUFFET: "Buffet",
   PLATED: "Plated",
   DROPOFF: "Drop-off",
 };
+const SERVICE_STYLE_LABEL_VN: Record<ServiceStyle, string> = {
+  BUFFET: "Buffet",
+  PLATED: "Set bàn",
+  DROPOFF: "Giao tận nơi",
+};
+export const SERVICE_STYLE_LABEL = SERVICE_STYLE_LABEL_EN;
+
+export function serviceStyleLabel(s: ServiceStyle, lang: Lang = "en") {
+  return (lang === "vn" ? SERVICE_STYLE_LABEL_VN : SERVICE_STYLE_LABEL_EN)[s];
+}
 
 export const REQUEST_STATUSES = [
   "NEW",
@@ -64,7 +102,7 @@ export const REQUEST_STATUSES = [
 ] as const;
 export type RequestStatus = (typeof REQUEST_STATUSES)[number];
 
-export const REQUEST_STATUS_LABEL: Record<RequestStatus, string> = {
+const REQUEST_STATUS_LABEL_EN: Record<RequestStatus, string> = {
   NEW: "New",
   CONTACTED: "Contacted",
   QUOTED: "Quoted",
@@ -72,6 +110,19 @@ export const REQUEST_STATUS_LABEL: Record<RequestStatus, string> = {
   COMPLETED: "Completed",
   DECLINED: "Declined",
 };
+const REQUEST_STATUS_LABEL_VN: Record<RequestStatus, string> = {
+  NEW: "Mới",
+  CONTACTED: "Đã liên hệ",
+  QUOTED: "Đã báo giá",
+  BOOKED: "Đã đặt",
+  COMPLETED: "Hoàn tất",
+  DECLINED: "Từ chối",
+};
+export const REQUEST_STATUS_LABEL = REQUEST_STATUS_LABEL_EN;
+
+export function requestStatusLabel(s: RequestStatus, lang: Lang = "en") {
+  return (lang === "vn" ? REQUEST_STATUS_LABEL_VN : REQUEST_STATUS_LABEL_EN)[s];
+}
 
 export const REQUEST_STATUS_COLOR: Record<RequestStatus, string> = {
   NEW: "bg-blue-500/20 text-blue-300 border-blue-500/40",

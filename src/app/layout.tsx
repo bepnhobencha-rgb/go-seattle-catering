@@ -5,6 +5,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Providers } from "@/components/Providers";
 import { getSettings } from "@/lib/settings";
+import { dict } from "@/lib/i18n";
+import { getLang } from "@/lib/i18n-server";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({
@@ -30,12 +32,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const settings = await getSettings();
+  const [settings, lang] = await Promise.all([getSettings(), getLang()]);
+  const t = dict[lang];
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+    <html lang={lang === "vn" ? "vi" : "en"} className={`${inter.variable} ${playfair.variable}`}>
       <body className="min-h-screen bg-ink-900 text-cream antialiased flex flex-col">
         <Providers>
-          <Header logo={settings.logo} brandName={settings.name} />
+          <Header logo={settings.logo} brandName={settings.name} lang={lang} t={t} />
           <main className="flex-1">{children}</main>
           <Footer />
         </Providers>

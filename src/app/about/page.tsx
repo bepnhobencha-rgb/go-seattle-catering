@@ -3,35 +3,36 @@ import Link from "next/link";
 import { Heart, ChefHat, Sparkles, Award, ArrowRight } from "lucide-react";
 import { AnimateIn } from "@/components/AnimateIn";
 import { maintenanceGate } from "@/lib/maintenance";
+import { dict } from "@/lib/i18n";
+import { getLang } from "@/lib/i18n-server";
 
 export const metadata = {
   title: "About — Gõ Seattle Catering",
-  description: "Vietnamese catering rooted in love, tradition, and beautiful presentation.",
 };
 
 export const revalidate = 0;
 
-const VALUES = [
-  { icon: Heart, title: "Made with love", desc: "Every dish is prepared with care, the way our family has cooked for generations." },
-  { icon: ChefHat, title: "Authentic flavors", desc: "Traditional Vietnamese recipes — no shortcuts, no compromise." },
-  { icon: Sparkles, title: "Beautifully presented", desc: "Food that looks as gorgeous as it tastes, perfect for special occasions." },
-  { icon: Award, title: "Trusted by Seattle", desc: "From intimate dinners to 500+ guest weddings, we've earned our community's trust." },
-];
-
 export default async function AboutPage() {
-  const s = await maintenanceGate();
+  const [s, lang] = await Promise.all([maintenanceGate(), getLang()]);
+  const t = dict[lang];
   const paragraphs = s.aboutStory.split(/\n\s*\n/).filter(Boolean);
+  const VALUES = [
+    { icon: Heart, title: t.aboutValueLove, desc: t.aboutValueLoveDesc },
+    { icon: ChefHat, title: t.aboutValueAuthentic, desc: t.aboutValueAuthenticDesc },
+    { icon: Sparkles, title: t.aboutValuePresented, desc: t.aboutValuePresentedDesc },
+    { icon: Award, title: t.aboutValueTrusted, desc: t.aboutValueTrustedDesc },
+  ];
   return (
     <div className="relative">
       <div className="absolute inset-x-0 top-0 h-[500px] bg-gold-radial opacity-40 pointer-events-none" />
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
         <AnimateIn>
           <div className="text-center">
-            <p className="eyebrow">Our Story</p>
+            <p className="eyebrow">{t.aboutEyebrow}</p>
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold mt-4">
-              <span className="text-gold-gradient">Cooking with love</span>
+              <span className="text-gold-gradient">{s.sloganEn}</span>
             </h1>
-            <p className="mt-3 italic text-gold-300/80">Hương Vị Việt — Taste of Vietnam</p>
+            <p className="mt-3 italic text-gold-300/80">{s.sloganVn}</p>
           </div>
         </AnimateIn>
 
@@ -90,7 +91,7 @@ export default async function AboutPage() {
         <AnimateIn>
           <div className="mt-24 text-center">
             <Link href="/catering" className="btn-gold">
-              Book your event <ArrowRight className="w-4 h-4" />
+              {t.aboutBookEvent} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </AnimateIn>

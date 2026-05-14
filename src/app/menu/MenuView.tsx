@@ -7,6 +7,7 @@ import { formatUSD } from "@/lib/utils";
 import { toast } from "@/components/Toaster";
 import { Plus, Check, X } from "lucide-react";
 import Link from "next/link";
+import type { Dict, Lang } from "@/lib/i18n";
 
 type MenuItem = {
   id: string;
@@ -40,7 +41,17 @@ const CATEGORY_BANNERS: Record<string, string> = {
   "smoothies": "/images/food/smoothies-3glass.jpg",
 };
 
-export function MenuView({ categories, toppings }: { categories: Category[]; toppings: Topping[] }) {
+export function MenuView({
+  categories,
+  toppings,
+  lang,
+  t,
+}: {
+  categories: Category[];
+  toppings: Topping[];
+  lang: Lang;
+  t: Dict;
+}) {
   const [active, setActive] = useState(categories[0]?.slug ?? "");
   const [selected, setSelected] = useState<MenuItem | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -56,13 +67,11 @@ export function MenuView({ categories, toppings }: { categories: Category[]; top
       <section className="relative border-b border-gold-900/30 overflow-hidden">
         <div className="absolute inset-0 bg-gold-radial opacity-50" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20 text-center">
-          <p className="eyebrow">Our Menu</p>
+          <p className="eyebrow">{t.menuEyebrow}</p>
           <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold mt-3">
-            Taste of <span className="text-gold-gradient">Vietnam</span>
+            {t.menuTitle} <span className="text-gold-gradient">{t.menuTitleAccent}</span>
           </h1>
-          <p className="mt-5 text-cream/70 max-w-2xl mx-auto">
-            Made-to-order dishes · Wait time 10–15 minutes · Party trays available upon request
-          </p>
+          <p className="mt-5 text-cream/70 max-w-2xl mx-auto">{t.menuSubtitle}</p>
         </div>
       </section>
 
@@ -80,7 +89,7 @@ export function MenuView({ categories, toppings }: { categories: Category[]; top
                   : "text-cream/75 hover:text-gold-300 hover:bg-gold-500/10 border border-gold-900/40"
               }`}
             >
-              {c.nameEn}
+              {lang === "vn" ? c.nameVn : c.nameEn}
             </a>
           ))}
         </div>
@@ -105,19 +114,21 @@ export function MenuView({ categories, toppings }: { categories: Category[]; top
                   <div className="absolute inset-0 bg-gradient-to-r from-ink-900/85 via-ink-900/40 to-transparent" />
                   <div className="absolute inset-0 flex flex-col justify-center px-8 sm:px-12">
                     <p className="text-gold-400 text-[10px] sm:text-xs tracking-[0.3em] uppercase font-semibold">
-                      Category
+                      {t.menuCategory}
                     </p>
                     <h2 className="font-display text-3xl sm:text-5xl font-bold mt-1">
-                      <span className="text-gold-gradient">{cat.nameEn}</span>
+                      <span className="text-gold-gradient">{lang === "vn" ? cat.nameVn : cat.nameEn}</span>
                     </h2>
-                    <p className="text-gold-300/80 italic mt-1 text-sm sm:text-base">{cat.nameVn}</p>
+                    <p className="text-gold-300/80 italic mt-1 text-sm sm:text-base">
+                      {lang === "vn" ? cat.nameEn : cat.nameVn}
+                    </p>
                   </div>
                 </div>
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
                 {cat.items.map((item) => (
-                  <ItemCard key={item.id} item={item} onSelect={() => openItem(item, cat)} />
+                  <ItemCard key={item.id} item={item} lang={lang} onSelect={() => openItem(item, cat)} />
                 ))}
               </div>
             </section>
@@ -130,6 +141,8 @@ export function MenuView({ categories, toppings }: { categories: Category[]; top
           item={selected}
           category={selectedCategory}
           toppings={DRINK_SLUGS.includes(selectedCategory.slug) ? toppings : []}
+          lang={lang}
+          t={t}
           onClose={() => {
             setSelected(null);
             setSelectedCategory(null);
@@ -137,12 +150,14 @@ export function MenuView({ categories, toppings }: { categories: Category[]; top
         />
       )}
 
-      <CartFloater />
+      <CartFloater t={t} />
     </div>
   );
 }
 
-function ItemCard({ item, onSelect }: { item: MenuItem; onSelect: () => void }) {
+function ItemCard({ item, lang, onSelect }: { item: MenuItem; lang: Lang; onSelect: () => void }) {
+  const primary = lang === "vn" && item.nameVn ? item.nameVn : item.nameEn;
+  const secondary = lang === "vn" && item.nameVn ? item.nameEn : item.nameVn;
   return (
     <button
       onClick={onSelect}
@@ -152,7 +167,7 @@ function ItemCard({ item, onSelect }: { item: MenuItem; onSelect: () => void }) 
         <div className="aspect-[16/10] overflow-hidden bg-ink-950 relative">
           <Image
             src={item.image}
-            alt={item.nameEn}
+            alt={primary}
             fill
             sizes="(min-width: 1024px) 25vw, 100vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -164,8 +179,8 @@ function ItemCard({ item, onSelect }: { item: MenuItem; onSelect: () => void }) 
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             {item.code && <p className="text-xs text-gold-500/80 font-mono">{item.code}</p>}
-            <h3 className="font-display font-bold text-lg text-cream mt-0.5">{item.nameEn}</h3>
-            {item.nameVn && <p className="text-sm text-gold-300/70 italic truncate">{item.nameVn}</p>}
+            <h3 className="font-display font-bold text-lg text-cream mt-0.5">{primary}</h3>
+            {secondary && <p className="text-sm text-gold-300/70 italic truncate">{secondary}</p>}
             {item.description && (
               <p className="text-xs text-cream/60 mt-2 line-clamp-2">{item.description}</p>
             )}
@@ -186,17 +201,23 @@ function ItemModal({
   item,
   category,
   toppings,
+  lang,
+  t,
   onClose,
 }: {
   item: MenuItem;
   category: Category;
   toppings: Topping[];
+  lang: Lang;
+  t: Dict;
   onClose: () => void;
 }) {
   const add = useCart((s) => s.add);
   const [qty, setQty] = useState(1);
   const [picked, setPicked] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
+  const primary = lang === "vn" && item.nameVn ? item.nameVn : item.nameEn;
+  const secondary = lang === "vn" && item.nameVn ? item.nameEn : item.nameVn;
 
   const toppingsList = useMemo(() => toppings.filter((t) => picked.includes(t.id)), [toppings, picked]);
   const linePrice = useMemo(
@@ -220,7 +241,7 @@ function ItemModal({
       notes: notes.trim() || undefined,
       image: item.image,
     });
-    toast(`${item.nameEn} added to cart`, "success");
+    toast(`${primary} — ${t.toastAddedToCart}`, "success");
     onClose();
   }
 
@@ -236,7 +257,7 @@ function ItemModal({
       >
         {item.image && (
           <div className="aspect-[2/1] relative overflow-hidden">
-            <Image src={item.image} alt={item.nameEn} fill sizes="500px" className="object-cover" />
+            <Image src={item.image} alt={primary} fill sizes="500px" className="object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-ink-900 via-ink-900/30 to-transparent" />
             <button
               onClick={onClose}
@@ -260,9 +281,9 @@ function ItemModal({
           <div className="flex items-start justify-between gap-4">
             <div>
               {item.code && <p className="text-xs text-gold-500/80 font-mono">{item.code}</p>}
-              <h3 className="font-display text-2xl font-bold text-cream mt-1">{item.nameEn}</h3>
-              {item.nameVn && <p className="text-gold-300/80 italic">{item.nameVn}</p>}
-              <p className="text-xs text-cream/55 mt-2">{category.nameEn}</p>
+              <h3 className="font-display text-2xl font-bold text-cream mt-1">{primary}</h3>
+              {secondary && <p className="text-gold-300/80 italic">{secondary}</p>}
+              <p className="text-xs text-cream/55 mt-2">{lang === "vn" ? category.nameVn : category.nameEn}</p>
             </div>
             <span className="text-2xl text-gold-300 font-display font-bold">{formatUSD(item.basePrice)}</span>
           </div>
@@ -273,7 +294,7 @@ function ItemModal({
 
           {toppings.length > 0 && (
             <div className="mt-6">
-              <h4 className="label-dark mb-2">Add toppings</h4>
+              <h4 className="label-dark mb-2">{t.menuAddToppings}</h4>
               <div className="grid grid-cols-2 gap-2">
                 {toppings.map((t) => {
                   const on = picked.includes(t.id);
@@ -300,13 +321,13 @@ function ItemModal({
           )}
 
           <div className="mt-6">
-            <label className="label-dark">Special instructions (optional)</label>
+            <label className="label-dark">{t.menuSpecialInstructions}</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
               className="input-dark"
-              placeholder="e.g. extra spicy, no cilantro…"
+              placeholder={t.menuSpecialPlaceholder}
             />
           </div>
 
@@ -327,7 +348,7 @@ function ItemModal({
               </button>
             </div>
             <button onClick={handleAdd} className="btn-gold">
-              Add · {formatUSD(linePrice)}
+              {t.menuAdd} · {formatUSD(linePrice)}
             </button>
           </div>
         </div>
@@ -336,7 +357,7 @@ function ItemModal({
   );
 }
 
-function CartFloater() {
+function CartFloater({ t }: { t: Dict }) {
   const items = useCart((s) => s.items);
   const subtotal = useCart((s) => s.subtotal());
   const count = items.reduce((n, i) => n + i.qty, 0);
@@ -344,7 +365,7 @@ function CartFloater() {
   return (
     <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-30" style={{ animation: "fade-in-up 300ms ease-out" }}>
       <Link href="/cart" className="btn-gold shadow-gold-lg">
-        View cart · {count} item{count > 1 ? "s" : ""} · {formatUSD(subtotal)}
+        {t.menuViewCart} · {count} {count > 1 ? t.menuItems : t.menuItem} · {formatUSD(subtotal)}
       </Link>
     </div>
   );
