@@ -6,12 +6,11 @@ import { authOptions } from "@/lib/auth";
 import { revalidateTag } from "next/cache";
 
 const Body = z.object({
-  slug: z.string().min(1).max(60).regex(/^[a-z0-9-]+$/, "Slug must be lowercase letters/digits/dashes"),
-  nameEn: z.string().min(1).max(120),
-  nameVn: z.string().min(1).max(120),
-  displayOrder: z.number().int().optional(),
+  name: z.string().min(1).max(80),
+  nameVn: z.string().max(80).default(""),
+  price: z.number().nonnegative(),
   isActive: z.boolean().default(true),
-  allowsToppings: z.boolean().default(false),
+  displayOrder: z.number().int().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -21,18 +20,13 @@ export async function POST(req: NextRequest) {
   }
   try {
     const data = Body.parse(await req.json());
-    const exists = await prisma.category.findUnique({ where: { slug: data.slug } });
-    if (exists) return NextResponse.json({ error: "Slug already in use" }, { status: 400 });
-
-    const max = await prisma.category.aggregate({ _max: { displayOrder: true } });
+    const max = await prisma.topping.aggregate({ _max: { displayOrder: true } });
     const displayOrder = data.displayOrder ?? (max._max.displayOrder ?? -1) + 1;
-
-    const category = await prisma.category.create({ data: { ...data, displayOrder } });
+    const topping = await prisma.topping.create({ data: { ...data, displayOrder } });
     revalidateTag("menu");
-    return NextResponse.json({ ok: true, category });
+    return NextResponse.json({ ok: true, topping });
   } catch (err) {
-    if (err instanceof z.ZodError)
-      return NextResponse.json({ error: "Invalid", issues: err.issues }, { status: 400 });
+    if (err instanceof z.ZodError) return NextResponse.json({ error: "Invalid" }, { status: 400 });
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

@@ -32,6 +32,7 @@ type Category = {
   nameVn: string;
   displayOrder: number;
   isActive: boolean;
+  allowsToppings: boolean;
   items: Item[];
 };
 
@@ -325,6 +326,7 @@ function CategoryModal({
     nameEn: category?.nameEn ?? "",
     nameVn: category?.nameVn ?? "",
     isActive: category?.isActive ?? true,
+    allowsToppings: category?.allowsToppings ?? false,
   });
   const [loading, setLoading] = useState(false);
   const isEdit = !!category;
@@ -402,7 +404,7 @@ function CategoryModal({
           />
           <p className="text-[10px] text-cream/50 mt-1">Lowercase, dashes only. Used in URLs.</p>
         </div>
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex flex-col gap-2 pt-2">
           <label className="inline-flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -411,6 +413,15 @@ function CategoryModal({
               className="accent-gold-500"
             />
             <span className="text-sm text-cream/85">Visible on menu</span>
+          </label>
+          <label className="inline-flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.allowsToppings}
+              onChange={(e) => setForm({ ...form, allowsToppings: e.target.checked })}
+              className="accent-gold-500"
+            />
+            <span className="text-sm text-cream/85">Allows toppings (e.g. boba, jellies)</span>
           </label>
         </div>
         <div className="flex gap-2 justify-end pt-2">

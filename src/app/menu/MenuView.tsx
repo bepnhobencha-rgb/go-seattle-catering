@@ -25,12 +25,11 @@ type Category = {
   slug: string;
   nameEn: string;
   nameVn: string;
+  allowsToppings: boolean;
   items: MenuItem[];
 };
 
-type Topping = { id: string; name: string; price: number };
-
-const DRINK_SLUGS = ["ice-juice", "milk-tea", "coffee", "smoothies"];
+type Topping = { id: string; name: string; nameVn: string; price: number };
 
 // Professional banner photo per category
 const CATEGORY_BANNERS: Record<string, string> = {
@@ -141,7 +140,7 @@ export function MenuView({
         <ItemModal
           item={selected}
           category={selectedCategory}
-          toppings={DRINK_SLUGS.includes(selectedCategory.slug) ? toppings : []}
+          toppings={selectedCategory.allowsToppings ? toppings : []}
           lang={lang}
           t={t}
           onClose={() => {
@@ -301,22 +300,23 @@ function ItemModal({
             <div className="mt-6">
               <h4 className="label-dark mb-2">{t.menuAddToppings}</h4>
               <div className="grid grid-cols-2 gap-2">
-                {toppings.map((t) => {
-                  const on = picked.includes(t.id);
+                {toppings.map((top) => {
+                  const on = picked.includes(top.id);
+                  const topName = lang === "vn" && top.nameVn ? top.nameVn : top.name;
                   return (
                     <button
-                      key={t.id}
-                      onClick={() => toggle(t.id)}
+                      key={top.id}
+                      onClick={() => toggle(top.id)}
                       className={`px-3 py-2 rounded-lg text-sm border text-left flex justify-between items-center transition-colors ${
                         on
                           ? "bg-gold-500/15 border-gold-500/60 text-gold-200"
                           : "border-gold-900/50 text-cream/80 hover:border-gold-500/40"
                       }`}
                     >
-                      <span>{t.name}</span>
+                      <span>{topName}</span>
                       <span className="text-xs">
                         {on && <Check className="w-3.5 h-3.5 inline mr-1" />}
-                        +{formatUSD(t.price)}
+                        +{formatUSD(top.price)}
                       </span>
                     </button>
                   );
