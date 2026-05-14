@@ -26,6 +26,13 @@ export type SiteSettings = {
   homeHeroIntro: string;
   aboutStory: string;
 
+  // Hero images
+  heroMainImage: string;
+  heroFloat1Image: string;
+  heroFloat1Label: string;
+  heroFloat2Image: string;
+  heroFloat2Label: string;
+
   // Operations
   taxRate: number;
   taxLabel: string;
@@ -77,6 +84,11 @@ export const SITE_DEFAULTS: SiteSettings = {
   homeHeroIntro: "Hương Vị Việt — bringing the authentic taste of Vietnam to your table with love and care.",
   aboutStory:
     "Gõ Seattle Catering was born from a simple belief: food cooked with love feeds the soul. We bring the rich, vibrant flavors of Vietnam — from the bustling street food of Saigon to the comforting family meals of the Mekong Delta — to tables all across Seattle.\n\nWhether you're planning an unforgettable wedding, a corporate luncheon, a private celebration, or a Sunday family gathering, our team crafts custom Vietnamese menus that honor tradition and delight every guest. We serve parties from 10 to 500+.\n\nEvery spring roll is hand-rolled. Every bowl of phở begins with a broth that simmers for hours. Every detail of presentation reflects our pride in our heritage and our commitment to your special day.",
+  heroMainImage: "/images/food/banh-mi-tray.jpg",
+  heroFloat1Image: "/images/food/spring-rolls.jpg",
+  heroFloat1Label: "Gỏi Cuốn · $7.85",
+  heroFloat2Image: "/images/food/ca-phe.jpg",
+  heroFloat2Label: "Cà Phê · $7.00",
 
   taxRate: 0.1025,
   taxLabel: "WA Sales Tax",
@@ -144,6 +156,12 @@ export async function getSettings(): Promise<SiteSettings> {
     homeHeroIntro: row.homeHeroIntro,
     aboutStory: row.aboutStory,
 
+    heroMainImage: row.heroMainImage || SITE_DEFAULTS.heroMainImage,
+    heroFloat1Image: row.heroFloat1Image || SITE_DEFAULTS.heroFloat1Image,
+    heroFloat1Label: row.heroFloat1Label || SITE_DEFAULTS.heroFloat1Label,
+    heroFloat2Image: row.heroFloat2Image || SITE_DEFAULTS.heroFloat2Image,
+    heroFloat2Label: row.heroFloat2Label || SITE_DEFAULTS.heroFloat2Label,
+
     taxRate: row.taxRate,
     taxLabel: row.taxLabel,
     currency: row.currency,
@@ -183,6 +201,11 @@ export function toPublicSettings(s: SiteSettings) {
     homeHeroLine3: s.homeHeroLine3,
     homeHeroIntro: s.homeHeroIntro,
     aboutStory: s.aboutStory,
+    heroMainImage: s.heroMainImage,
+    heroFloat1Image: s.heroFloat1Image,
+    heroFloat1Label: s.heroFloat1Label,
+    heroFloat2Image: s.heroFloat2Image,
+    heroFloat2Label: s.heroFloat2Label,
     taxRate: s.taxRate,
     taxLabel: s.taxLabel,
     currency: s.currency,

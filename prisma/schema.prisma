@@ -130,12 +130,19 @@ model Settings {
   hours     String   @default("[]") // JSON: [{day, hours}, ...]
   mapEmbedUrl String @default("")
 
-  // Content
+  // Content — text
   homeHeroLine1 String @default("Cooking with love")
   homeHeroLine2 String @default("provides food")
   homeHeroLine3 String @default("for the soul")
   homeHeroIntro String @default("Hương Vị Việt — bringing the authentic taste of Vietnam to your table with love and care.")
   aboutStory    String @default("")
+
+  // Content — home hero images (admin-editable via /admin/settings)
+  heroMainImage   String @default("/images/food/banh-mi-tray.jpg")
+  heroFloat1Image String @default("/images/food/spring-rolls.jpg")
+  heroFloat1Label String @default("Gỏi Cuốn · $7.85")
+  heroFloat2Image String @default("/images/food/ca-phe.jpg")
+  heroFloat2Label String @default("Cà Phê · $7.00")
 
   // Operations
   taxRate          Float  @default(0.1025)

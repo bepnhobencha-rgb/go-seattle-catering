@@ -116,8 +116,8 @@ export default async function HomePage() {
             <div className="relative aspect-[5/6] sm:aspect-[6/7] lg:aspect-[5/6] max-w-lg mx-auto">
               <div className="absolute inset-0 gold-frame shadow-gold-lg">
                 <Image
-                  src="/images/food/banh-mi-tray.jpg"
-                  alt="Vietnamese bánh mì catering tray"
+                  src={settings.heroMainImage}
+                  alt="Hero"
                   fill
                   priority
                   sizes="(min-width: 1024px) 30vw, 80vw"
@@ -126,35 +126,43 @@ export default async function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-ink-900/60 via-transparent to-transparent" />
               </div>
 
-              <div className="absolute -left-6 sm:-left-10 bottom-10 w-40 sm:w-52 float-y">
-                <div className="gold-frame shadow-gold-lg aspect-[4/5]">
-                  <Image
-                    src="/images/food/spring-rolls.jpg"
-                    alt="Fresh spring rolls"
-                    fill
-                    sizes="220px"
-                    className="object-cover"
-                  />
+              {settings.heroFloat1Image && (
+                <div className="absolute -left-6 sm:-left-10 bottom-10 w-40 sm:w-52 float-y">
+                  <div className="gold-frame shadow-gold-lg aspect-[4/5]">
+                    <Image
+                      src={settings.heroFloat1Image}
+                      alt={settings.heroFloat1Label}
+                      fill
+                      sizes="220px"
+                      className="object-cover"
+                    />
+                  </div>
+                  {settings.heroFloat1Label && (
+                    <p className="mt-2 text-center text-xs uppercase tracking-widest text-gold-300">
+                      {settings.heroFloat1Label}
+                    </p>
+                  )}
                 </div>
-                <p className="mt-2 text-center text-xs uppercase tracking-widest text-gold-300">
-                  Gỏi Cuốn · $7.85
-                </p>
-              </div>
+              )}
 
-              <div className="absolute -right-4 sm:-right-8 top-4 w-28 sm:w-36 float-y" style={{ animationDelay: "1.5s" }}>
-                <div className="gold-frame shadow-gold-lg aspect-[3/4]">
-                  <Image
-                    src="/images/food/ca-phe.jpg"
-                    alt="Vietnamese iced coffee"
-                    fill
-                    sizes="160px"
-                    className="object-cover"
-                  />
+              {settings.heroFloat2Image && (
+                <div className="absolute -right-4 sm:-right-8 top-4 w-28 sm:w-36 float-y" style={{ animationDelay: "1.5s" }}>
+                  <div className="gold-frame shadow-gold-lg aspect-[3/4]">
+                    <Image
+                      src={settings.heroFloat2Image}
+                      alt={settings.heroFloat2Label}
+                      fill
+                      sizes="160px"
+                      className="object-cover"
+                    />
+                  </div>
+                  {settings.heroFloat2Label && (
+                    <p className="mt-2 text-center text-xs uppercase tracking-widest text-gold-300">
+                      {settings.heroFloat2Label}
+                    </p>
+                  )}
                 </div>
-                <p className="mt-2 text-center text-xs uppercase tracking-widest text-gold-300">
-                  Cà Phê · $7.00
-                </p>
-              </div>
+              )}
             </div>
           </AnimateIn>
         </div>

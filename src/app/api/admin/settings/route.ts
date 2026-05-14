@@ -32,6 +32,13 @@ const Body = z.object({
   homeHeroIntro: z.string().max(500).default(""),
   aboutStory: z.string().max(5000).default(""),
 
+  // Hero images
+  heroMainImage: z.string().max(500).default(""),
+  heroFloat1Image: z.string().max(500).default(""),
+  heroFloat1Label: z.string().max(120).default(""),
+  heroFloat2Image: z.string().max(500).default(""),
+  heroFloat2Label: z.string().max(120).default(""),
+
   // Operations
   taxRate: z.number().min(0).max(1).default(0.1025),
   taxLabel: z.string().max(60).default("Sales Tax"),
@@ -85,6 +92,11 @@ export async function PATCH(req: NextRequest) {
       homeHeroLine3: data.homeHeroLine3,
       homeHeroIntro: data.homeHeroIntro,
       aboutStory: data.aboutStory,
+      heroMainImage: data.heroMainImage || "/images/food/banh-mi-tray.jpg",
+      heroFloat1Image: data.heroFloat1Image || "/images/food/spring-rolls.jpg",
+      heroFloat1Label: data.heroFloat1Label || "Gỏi Cuốn · $7.85",
+      heroFloat2Image: data.heroFloat2Image || "/images/food/ca-phe.jpg",
+      heroFloat2Label: data.heroFloat2Label || "Cà Phê · $7.00",
       taxRate: data.taxRate,
       taxLabel: data.taxLabel,
       currency: data.currency,

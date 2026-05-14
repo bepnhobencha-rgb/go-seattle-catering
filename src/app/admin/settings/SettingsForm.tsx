@@ -141,6 +141,55 @@ export function SettingsForm({ initial }: { initial: SiteSettings }) {
         <Field label="Hero intro paragraph">
           <textarea rows={2} className="input-dark" value={s.homeHeroIntro} onChange={(e) => setS({ ...s, homeHeroIntro: e.target.value })} />
         </Field>
+
+        <div className="border-t border-gold-900/30 pt-4">
+          <p className="text-xs uppercase tracking-widest text-gold-400 font-semibold mb-3">
+            Hero images (home page)
+          </p>
+          <div className="space-y-4">
+            <HeroImageField
+              label="Main hero image (big background)"
+              value={s.heroMainImage}
+              onChange={(v) => setS({ ...s, heroMainImage: v })}
+              aspect="aspect-[5/6]"
+            />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <HeroImageField
+                  label="Floating image 1 (bottom-left)"
+                  value={s.heroFloat1Image}
+                  onChange={(v) => setS({ ...s, heroFloat1Image: v })}
+                  aspect="aspect-[4/5]"
+                />
+                <Field label="Label below image 1">
+                  <input
+                    className="input-dark text-sm"
+                    value={s.heroFloat1Label}
+                    onChange={(e) => setS({ ...s, heroFloat1Label: e.target.value })}
+                    placeholder="Gỏi Cuốn · $7.85"
+                  />
+                </Field>
+              </div>
+              <div className="space-y-2">
+                <HeroImageField
+                  label="Floating image 2 (top-right)"
+                  value={s.heroFloat2Image}
+                  onChange={(v) => setS({ ...s, heroFloat2Image: v })}
+                  aspect="aspect-[3/4]"
+                />
+                <Field label="Label below image 2">
+                  <input
+                    className="input-dark text-sm"
+                    value={s.heroFloat2Label}
+                    onChange={(e) => setS({ ...s, heroFloat2Label: e.target.value })}
+                    placeholder="Cà Phê · $7.00"
+                  />
+                </Field>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <Field label="About page story" hint="Use blank lines to separate paragraphs.">
           <textarea rows={8} className="input-dark" value={s.aboutStory} onChange={(e) => setS({ ...s, aboutStory: e.target.value })} />
         </Field>
@@ -258,6 +307,91 @@ function MaintenanceSection({ s, setS }: { s: SiteSettings; setS: (s: SiteSettin
         />
       </div>
     </section>
+  );
+}
+
+function HeroImageField({
+  label,
+  value,
+  onChange,
+  aspect,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  aspect: string;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast("File too large (max 5 MB)", "error");
+      e.target.value = "";
+      return;
+    }
+    setUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload failed");
+      onChange(data.url);
+      toast("Uploaded — click Save to apply", "success");
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Upload failed", "error");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  return (
+    <div>
+      <label className="label-dark">{label}</label>
+      <div className="flex gap-3 items-start">
+        <div className={`w-24 ${aspect} rounded-md overflow-hidden bg-ink-950 border border-gold-900/40 shrink-0 relative`}>
+          {value ? (
+            <Image src={value} alt="" fill sizes="96px" className="object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gold-900/60">
+              <ImageIcon className="w-5 h-5" />
+            </div>
+          )}
+        </div>
+        <div className="flex-1 space-y-2">
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Paste URL or upload"
+            className="input-dark text-sm"
+          />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="btn-outline-gold !py-1.5 !px-3 text-xs disabled:opacity-60"
+          >
+            {uploading ? (
+              <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading…</>
+            ) : (
+              <><Upload className="w-3.5 h-3.5" /> Upload</>
+            )}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            onChange={onFile}
+            className="hidden"
+          />
+        </div>
+      </div>
+    </div>
   );
 }
 
