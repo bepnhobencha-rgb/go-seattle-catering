@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { prisma } from "@/lib/prisma";
 import { formatUSD } from "@/lib/utils";
 import { maintenanceGate } from "@/lib/maintenance";
 import { localized } from "@/lib/settings";
+import { getFeaturedItems, getActiveTestimonials } from "@/lib/data-cache";
 import { dict, interpolate } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
 import { AnimateIn } from "@/components/AnimateIn";
@@ -22,7 +22,7 @@ import {
   Quote,
 } from "lucide-react";
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 export default async function HomePage() {
   const [settings, lang] = await Promise.all([maintenanceGate(), getLang()]);
@@ -45,17 +45,8 @@ export default async function HomePage() {
   ];
 
   const [featured, testimonials] = await Promise.all([
-    prisma.menuItem.findMany({
-      where: { isActive: true, isFeatured: true },
-      include: { category: true },
-      orderBy: { displayOrder: "asc" },
-      take: 6,
-    }),
-    prisma.testimonial.findMany({
-      where: { isActive: true },
-      orderBy: { displayOrder: "asc" },
-      take: 6,
-    }),
+    getFeaturedItems(),
+    getActiveTestimonials(),
   ]);
 
   return (

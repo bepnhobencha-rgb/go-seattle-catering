@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { revalidateTag } from "next/cache";
 
 const Body = z.object({
   basePrice: z.number().nonnegative().optional(),
@@ -28,6 +29,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   try {
     const data = Body.parse(await req.json());
     const item = await prisma.menuItem.update({ where: { id: params.id }, data });
+    revalidateTag("menu");
+    revalidateTag("featured");
     return NextResponse.json({ ok: true, item });
   } catch (err) {
     if (err instanceof z.ZodError) return NextResponse.json({ error: "Invalid" }, { status: 400 });
@@ -39,6 +42,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   if (!(await requireAdmin())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   try {
     await prisma.menuItem.delete({ where: { id: params.id } });
+    revalidateTag("menu");
+    revalidateTag("featured");
     return NextResponse.json({ ok: true });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Not found";

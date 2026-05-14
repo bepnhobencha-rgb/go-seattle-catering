@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { revalidateTag } from "next/cache";
 
 const Body = z.object({
   name: z.string().min(1).max(120),
@@ -22,6 +23,7 @@ export async function POST(req: NextRequest) {
   try {
     const data = Body.parse(await req.json());
     const testimonial = await prisma.testimonial.create({ data });
+    revalidateTag("testimonials");
     return NextResponse.json({ ok: true, testimonial });
   } catch (err) {
     if (err instanceof z.ZodError) return NextResponse.json({ error: "Invalid" }, { status: 400 });

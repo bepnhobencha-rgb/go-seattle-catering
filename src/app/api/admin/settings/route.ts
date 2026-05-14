@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { revalidateTag } from "next/cache";
 
 const Hour = z.object({
   day: z.string().min(1).max(20),
@@ -140,6 +141,9 @@ export async function PATCH(req: NextRequest) {
       update: payload,
       create: { id: "default", ...payload },
     });
+    // Bust the settings cache so every page re-fetches on next request
+    revalidateTag("settings");
+
     // Never echo back secret keys
     return NextResponse.json({
       ok: true,

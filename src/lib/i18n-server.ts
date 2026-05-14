@@ -1,10 +1,12 @@
 import { cookies, headers } from "next/headers";
+import { cache } from "react";
 import type { Lang } from "./i18n";
 
 const LANG_COOKIE = "gs-lang";
 
-/** Server-side only: read user's language preference from cookie, fall back to Accept-Language. */
-export async function getLang(): Promise<Lang> {
+/** Server-side only: read user's language preference from cookie, fall back to Accept-Language.
+ *  Wrapped with React `cache()` so layout + page + footer share one resolution per request. */
+export const getLang = cache(async (): Promise<Lang> => {
   const cookieStore = cookies();
   const fromCookie = cookieStore.get(LANG_COOKIE)?.value;
   if (fromCookie === "vn" || fromCookie === "en") return fromCookie;
@@ -13,4 +15,4 @@ export async function getLang(): Promise<Lang> {
   const lower = acceptLang.toLowerCase();
   if (lower.includes("vi") || lower.includes("vn")) return "vn";
   return "en";
-}
+});

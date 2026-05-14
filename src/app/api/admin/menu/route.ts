@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { revalidateTag } from "next/cache";
 
 const Body = z.object({
   categoryId: z.string().min(1),
@@ -39,6 +40,8 @@ export async function POST(req: NextRequest) {
     const item = await prisma.menuItem.create({
       data: { ...data, displayOrder },
     });
+    revalidateTag("menu");
+    revalidateTag("featured");
     return NextResponse.json({ ok: true, item });
   } catch (err) {
     if (err instanceof z.ZodError)

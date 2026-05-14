@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { revalidateTag } from "next/cache";
 
 const Body = z.object({
   slug: z.string().min(1).max(60).regex(/^[a-z0-9-]+$/, "Slug must be lowercase letters/digits/dashes"),
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
     const displayOrder = data.displayOrder ?? (max._max.displayOrder ?? -1) + 1;
 
     const category = await prisma.category.create({ data: { ...data, displayOrder } });
+    revalidateTag("menu");
     return NextResponse.json({ ok: true, category });
   } catch (err) {
     if (err instanceof z.ZodError)

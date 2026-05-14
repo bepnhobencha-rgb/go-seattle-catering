@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { unstable_noStore as noStore } from "next/cache";
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 
 export type Hour = { day: string; hours: string };
 
@@ -144,25 +145,43 @@ function parseHours(raw: string): Hour[] {
   return DEFAULT_HOURS;
 }
 
-export async function getSettings(): Promise<SiteSettings> {
-  noStore();
-  const row = await prisma.settings.upsert({
-    where: { id: "default" },
-    update: {},
-    create: {
-      id: "default",
-      name: SITE_DEFAULTS.name,
-      sloganEn: SITE_DEFAULTS.sloganEn,
-      sloganVn: SITE_DEFAULTS.sloganVn,
-      phone: SITE_DEFAULTS.phone,
-      email: SITE_DEFAULTS.email,
-      address: SITE_DEFAULTS.address,
-      website: SITE_DEFAULTS.website,
-      facebook: SITE_DEFAULTS.facebook,
-      hours: JSON.stringify(SITE_DEFAULTS.hours),
-      aboutStory: SITE_DEFAULTS.aboutStory,
-    },
-  });
+/**
+ * Cross-request cache (60 s). Invalidated explicitly by admin save via
+ * `revalidateTag("settings")` so changes propagate immediately while public
+ * pages don't hit the DB on every visit.
+ */
+const fetchSettingsRow = unstable_cache(
+  async () => {
+    let row = await prisma.settings.findUnique({ where: { id: "default" } });
+    if (!row) {
+      row = await prisma.settings.create({
+        data: {
+          id: "default",
+          name: SITE_DEFAULTS.name,
+          sloganEn: SITE_DEFAULTS.sloganEn,
+          sloganVn: SITE_DEFAULTS.sloganVn,
+          phone: SITE_DEFAULTS.phone,
+          email: SITE_DEFAULTS.email,
+          address: SITE_DEFAULTS.address,
+          website: SITE_DEFAULTS.website,
+          facebook: SITE_DEFAULTS.facebook,
+          hours: JSON.stringify(SITE_DEFAULTS.hours),
+          aboutStory: SITE_DEFAULTS.aboutStory,
+        },
+      });
+    }
+    return row;
+  },
+  ["settings"],
+  { tags: ["settings"], revalidate: 60 }
+);
+
+/**
+ * `cache()` from React dedupes within a single request render — so the layout,
+ * page, footer, etc. share one DB roundtrip per request.
+ */
+export const getSettings = cache(async (): Promise<SiteSettings> => {
+  const row = await fetchSettingsRow();
   return {
     name: row.name,
     sloganEn: row.sloganEn,
@@ -216,7 +235,7 @@ export async function getSettings(): Promise<SiteSettings> {
     stripeSecretKey: row.stripeSecretKey,
     stripeWebhookSecret: row.stripeWebhookSecret,
   };
-}
+});
 
 /** Public-safe settings — never include secret keys. Use this when passing settings to client. */
 export function toPublicSettings(s: SiteSettings) {
