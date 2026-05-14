@@ -1,0 +1,198 @@
+// Gõ Seattle Catering — DB schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Enums stored as String in SQLite. Validated at app layer (lib/enums.ts).
+//   Role:          CUSTOMER, ADMIN
+//   OrderStatus:   PENDING, CONFIRMED, PREPARING, READY, COMPLETED, CANCELLED
+//   EventType:     WEDDING, PRIVATE_PARTY, CORPORATE, FAMILY, OTHER
+//   ServiceStyle:  BUFFET, PLATED, DROPOFF
+//   RequestStatus: NEW, CONTACTED, QUOTED, BOOKED, COMPLETED, DECLINED
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         String   @default("CUSTOMER")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  orders           Order[]
+  cateringRequests CateringRequest[]
+}
+
+model Category {
+  id           String     @id @default(cuid())
+  slug         String     @unique
+  nameEn       String
+  nameVn       String
+  displayOrder Int        @default(0)
+  isActive     Boolean    @default(true)
+  items        MenuItem[]
+}
+
+model MenuItem {
+  id           String   @id @default(cuid())
+  categoryId   String
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  code         String?
+  nameEn       String
+  nameVn       String?
+  description  String?
+  basePrice    Float
+  image        String?
+  isActive     Boolean  @default(true)
+  isFeatured   Boolean  @default(false)
+  displayOrder Int      @default(0)
+
+  orderItems OrderItem[]
+
+  @@index([categoryId])
+  @@index([isFeatured])
+}
+
+model Topping {
+  id       String  @id @default(cuid())
+  name     String
+  price    Float
+  isActive Boolean @default(true)
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  orderNumber     String   @unique
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id])
+  customerName    String
+  phone           String
+  email           String
+  pickupAt        DateTime
+  subtotal        Float
+  tax             Float
+  total           Float
+  notes           String?
+  status          String   @default("PENDING")
+  // Payment: "PICKUP" (pay at pickup) or "STRIPE"
+  paymentMethod   String   @default("PICKUP")
+  // PaymentStatus: UNPAID, PAID, REFUNDED, FAILED
+  paymentStatus   String   @default("UNPAID")
+  stripeSessionId String?  @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  quantity   Int      @default(1)
+  unitPrice  Float
+  toppings   String?
+  extras     String?
+  notes      String?
+
+  @@index([orderId])
+}
+
+// Singleton: id is always "default"
+model Settings {
+  id        String   @id @default("default")
+
+  // Brand
+  name      String   @default("Gõ Seattle Catering")
+  sloganEn  String   @default("Cooking with love provides food for the soul")
+  sloganVn  String   @default("Hương Vị Việt — Taste of Vietnam")
+  logo      String   @default("/images/logos/logo-dark.jpg")
+
+  // Contact
+  phone     String   @default("")
+  email     String   @default("")
+  address   String   @default("")
+  website   String   @default("")
+  facebook  String   @default("")
+  hours     String   @default("[]") // JSON: [{day, hours}, ...]
+  mapEmbedUrl String @default("")
+
+  // Content
+  homeHeroLine1 String @default("Cooking with love")
+  homeHeroLine2 String @default("provides food")
+  homeHeroLine3 String @default("for the soul")
+  homeHeroIntro String @default("Hương Vị Việt — bringing the authentic taste of Vietnam to your table with love and care.")
+  aboutStory    String @default("")
+
+  // Operations
+  taxRate          Float  @default(0.1025)
+  taxLabel         String @default("WA Sales Tax")
+  currency         String @default("USD")
+  minPickupMinutes Int    @default(30)
+  maxPickupDays    Int    @default(7)
+  cateringMinGuests Int   @default(10)
+  cateringMaxGuests Int   @default(1000)
+
+  // Maintenance mode
+  maintenanceMode    Boolean @default(false)
+  maintenanceTitle   String  @default("We're crafting something special")
+  maintenanceMessage String  @default("Our website is currently being prepared. We'll be ready to welcome you very soon. In the meantime, feel free to reach out for catering inquiries.")
+
+  // Stripe (test or live)
+  stripeEnabled         Boolean @default(false)
+  stripeMode            String  @default("test") // "test" | "live"
+  stripePublishableKey  String  @default("")
+  stripeSecretKey       String  @default("")
+  stripeWebhookSecret   String  @default("")
+
+  updatedAt DateTime @updatedAt
+}
+
+model Testimonial {
+  id           String   @id @default(cuid())
+  name         String
+  role         String   // e.g. "Wedding · 250 guests"
+  rating       Int      @default(5)
+  text         String
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model CateringRequest {
+  id            String   @id @default(cuid())
+  requestNumber String   @unique
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  eventType     String
+  eventDate     DateTime
+  eventTime     String
+  guestCount    Int
+  serviceStyle  String
+  budgetRange   String?
+  menuRequests  String?
+  customerName  String
+  phone         String
+  email         String
+  status        String   @default("NEW")
+  adminNotes    String?
+  quotedAmount  Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
