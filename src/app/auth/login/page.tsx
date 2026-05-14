@@ -16,12 +16,6 @@ export default async function LoginPage() {
       <Suspense fallback={<div className="mt-8 card p-6">{t.loading}</div>}>
         <LoginForm t={t} />
       </Suspense>
-
-      <div className="mt-8 text-xs text-cream/50 text-center space-y-1">
-        <p>Demo accounts:</p>
-        <p className="font-mono">admin@goseattlecatering.com / admin123</p>
-        <p className="font-mono">demo@example.com / demo123</p>
-      </div>
     </div>
   );
 }
