@@ -3,6 +3,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { formatUSD } from "@/lib/utils";
 import { maintenanceGate } from "@/lib/maintenance";
+import { localized } from "@/lib/settings";
 import { dict, interpolate } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
 import { AnimateIn } from "@/components/AnimateIn";
@@ -75,20 +76,20 @@ export default async function HomePage() {
             </AnimateIn>
             <AnimateIn delay={100}>
               <h1 className="display-h1 text-5xl sm:text-6xl lg:text-7xl mt-5">
-                <span className="text-gold-gradient">{settings.homeHeroLine1}</span>
+                <span className="text-gold-gradient">{localized(settings, "homeHeroLine1", lang)}</span>
                 <br />
-                <span className="text-cream">{settings.homeHeroLine2}</span>
-                {settings.homeHeroLine3 && (
+                <span className="text-cream">{localized(settings, "homeHeroLine2", lang)}</span>
+                {localized(settings, "homeHeroLine3", lang) && (
                   <>
                     <br />
-                    <span className="text-cream">{settings.homeHeroLine3}</span>
+                    <span className="text-cream">{localized(settings, "homeHeroLine3", lang)}</span>
                   </>
                 )}
               </h1>
             </AnimateIn>
             <AnimateIn delay={200}>
               <p className="mt-6 text-lg text-cream/75 max-w-xl italic">
-                {settings.homeHeroIntro}
+                {localized(settings, "homeHeroIntro", lang)}
               </p>
             </AnimateIn>
             <AnimateIn delay={300}>
@@ -313,7 +314,11 @@ export default async function HomePage() {
                         <Star key={idx} className="w-4 h-4 fill-gold-400 stroke-gold-400" />
                       ))}
                     </div>
-                    <p className="text-cream/85 text-sm leading-relaxed">{tt.text}</p>
+                    <p className="text-cream/85 text-sm leading-relaxed">
+                      {lang === "vn" && (tt as { textVn?: string }).textVn?.trim()
+                        ? (tt as { textVn: string }).textVn
+                        : tt.text}
+                    </p>
                     <div className="divider-gold my-4" />
                     <p className="text-sm font-semibold text-gold-200">{tt.name}</p>
                     <p className="text-xs text-cream/55">{tt.role}</p>

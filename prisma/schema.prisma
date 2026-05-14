@@ -130,12 +130,19 @@ model Settings {
   hours     String   @default("[]") // JSON: [{day, hours}, ...]
   mapEmbedUrl String @default("")
 
-  // Content — text
+  // Content — text (English)
   homeHeroLine1 String @default("Cooking with love")
   homeHeroLine2 String @default("provides food")
   homeHeroLine3 String @default("for the soul")
   homeHeroIntro String @default("Hương Vị Việt — bringing the authentic taste of Vietnam to your table with love and care.")
   aboutStory    String @default("")
+
+  // Content — text (Vietnamese)
+  homeHeroLine1Vn String @default("Nấu bằng cả tấm lòng")
+  homeHeroLine2Vn String @default("là món ăn")
+  homeHeroLine3Vn String @default("dành cho tâm hồn")
+  homeHeroIntroVn String @default("Hương Vị Việt — mang hương vị Việt Nam đến bàn tiệc của bạn với tất cả sự yêu thương và chăm chút.")
+  aboutStoryVn    String @default("")
 
   // Content — home hero images (admin-editable via /admin/settings)
   heroMainImage   String @default("/images/food/banh-mi-tray.jpg")
@@ -157,6 +164,8 @@ model Settings {
   maintenanceMode    Boolean @default(false)
   maintenanceTitle   String  @default("We're crafting something special")
   maintenanceMessage String  @default("Our website is currently being prepared. We'll be ready to welcome you very soon. In the meantime, feel free to reach out for catering inquiries.")
+  maintenanceTitleVn   String  @default("Chúng tôi đang chuẩn bị điều đặc biệt")
+  maintenanceMessageVn String  @default("Website đang trong giai đoạn hoàn thiện. Chúng tôi sẽ sẵn sàng đón tiếp bạn rất sớm. Trong thời gian này, vui lòng liên hệ trực tiếp cho mọi yêu cầu đặt tiệc.")
 
   // Email notifications (Resend)
   resendApiKey  String  @default("")
@@ -191,6 +200,7 @@ model Testimonial {
   role         String   // e.g. "Wedding · 250 guests"
   rating       Int      @default(5)
   text         String
+  textVn       String   @default("")
   isActive     Boolean  @default(true)
   displayOrder Int      @default(0)
   createdAt    DateTime @default(now())

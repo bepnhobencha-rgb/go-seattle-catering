@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Heart, ChefHat, Sparkles, Award, ArrowRight } from "lucide-react";
 import { AnimateIn } from "@/components/AnimateIn";
 import { maintenanceGate } from "@/lib/maintenance";
+import { localized } from "@/lib/settings";
 import { dict } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
 
@@ -15,7 +16,8 @@ export const revalidate = 0;
 export default async function AboutPage() {
   const [s, lang] = await Promise.all([maintenanceGate(), getLang()]);
   const t = dict[lang];
-  const paragraphs = s.aboutStory.split(/\n\s*\n/).filter(Boolean);
+  const story = localized(s, "aboutStory", lang);
+  const paragraphs = story.split(/\n\s*\n/).filter(Boolean);
   const VALUES = [
     { icon: Heart, title: t.aboutValueLove, desc: t.aboutValueLoveDesc },
     { icon: ChefHat, title: t.aboutValueAuthentic, desc: t.aboutValueAuthenticDesc },

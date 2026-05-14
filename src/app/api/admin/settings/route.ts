@@ -25,12 +25,19 @@ const Body = z.object({
   hours: z.array(Hour).max(20).default([]),
   mapEmbedUrl: z.string().max(2000).default(""),
 
-  // Content
+  // Content (English)
   homeHeroLine1: z.string().max(120).default(""),
   homeHeroLine2: z.string().max(120).default(""),
   homeHeroLine3: z.string().max(120).default(""),
   homeHeroIntro: z.string().max(500).default(""),
   aboutStory: z.string().max(5000).default(""),
+
+  // Content (Vietnamese)
+  homeHeroLine1Vn: z.string().max(120).default(""),
+  homeHeroLine2Vn: z.string().max(120).default(""),
+  homeHeroLine3Vn: z.string().max(120).default(""),
+  homeHeroIntroVn: z.string().max(500).default(""),
+  aboutStoryVn: z.string().max(5000).default(""),
 
   // Hero images
   heroMainImage: z.string().max(500).default(""),
@@ -52,6 +59,8 @@ const Body = z.object({
   maintenanceMode: z.boolean().default(false),
   maintenanceTitle: z.string().max(200).default(""),
   maintenanceMessage: z.string().max(1000).default(""),
+  maintenanceTitleVn: z.string().max(200).default(""),
+  maintenanceMessageVn: z.string().max(1000).default(""),
 
   // Email
   resendApiKey: z.string().max(200).default(""),
@@ -96,6 +105,11 @@ export async function PATCH(req: NextRequest) {
       homeHeroLine3: data.homeHeroLine3,
       homeHeroIntro: data.homeHeroIntro,
       aboutStory: data.aboutStory,
+      homeHeroLine1Vn: data.homeHeroLine1Vn,
+      homeHeroLine2Vn: data.homeHeroLine2Vn,
+      homeHeroLine3Vn: data.homeHeroLine3Vn,
+      homeHeroIntroVn: data.homeHeroIntroVn,
+      aboutStoryVn: data.aboutStoryVn,
       heroMainImage: data.heroMainImage || "/images/food/banh-mi-tray.jpg",
       heroFloat1Image: data.heroFloat1Image || "/images/food/spring-rolls.jpg",
       heroFloat1Label: data.heroFloat1Label || "Gỏi Cuốn · $7.85",
@@ -111,6 +125,8 @@ export async function PATCH(req: NextRequest) {
       maintenanceMode: data.maintenanceMode,
       maintenanceTitle: data.maintenanceTitle || "We're crafting something special",
       maintenanceMessage: data.maintenanceMessage || "Our website is currently being prepared. We'll be ready to welcome you very soon.",
+      maintenanceTitleVn: data.maintenanceTitleVn || "Chúng tôi đang chuẩn bị điều đặc biệt",
+      maintenanceMessageVn: data.maintenanceMessageVn || "Website đang trong giai đoạn hoàn thiện. Chúng tôi sẽ sẵn sàng đón tiếp bạn rất sớm.",
       resendApiKey: data.resendApiKey,
       notifyEmail: data.notifyEmail,
       stripeEnabled: data.stripeEnabled,

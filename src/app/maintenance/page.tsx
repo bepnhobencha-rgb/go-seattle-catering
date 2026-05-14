@@ -1,4 +1,5 @@
-import { getSettings } from "@/lib/settings";
+import { getSettings, localized } from "@/lib/settings";
+import { getLang } from "@/lib/i18n-server";
 import Image from "next/image";
 import Link from "next/link";
 import { Phone, Mail, MapPin, Sparkles, Clock } from "lucide-react";
@@ -11,7 +12,9 @@ export const metadata = {
 export const revalidate = 0;
 
 export default async function MaintenancePage() {
-  const s = await getSettings();
+  const [s, lang] = await Promise.all([getSettings(), getLang()]);
+  const title = localized(s, "maintenanceTitle", lang);
+  const message = localized(s, "maintenanceMessage", lang);
   return (
     <main className="min-h-screen bg-ink-900 text-cream flex flex-col">
       {/* Ambient gold glows */}
@@ -54,7 +57,7 @@ export default async function MaintenancePage() {
             </p>
 
             <h1 className="font-display font-bold mt-6 text-5xl sm:text-6xl lg:text-7xl leading-[1.05]">
-              <span className="text-gold-gradient">{s.maintenanceTitle}</span>
+              <span className="text-gold-gradient">{title}</span>
             </h1>
 
             {s.sloganVn && (
@@ -62,7 +65,7 @@ export default async function MaintenancePage() {
             )}
 
             <p className="mt-8 text-cream/75 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed text-balance">
-              {s.maintenanceMessage}
+              {message}
             </p>
 
             {/* Decorative divider */}

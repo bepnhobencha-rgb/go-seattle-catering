@@ -127,20 +127,45 @@ export function SettingsForm({ initial }: { initial: SiteSettings }) {
       </Section>
 
       <Section icon={Type} title="Content (home + about)">
-        <Field label="Hero headline — line 1" hint="Shown in large gold gradient.">
-          <input className="input-dark" value={s.homeHeroLine1} onChange={(e) => setS({ ...s, homeHeroLine1: e.target.value })} />
-        </Field>
+        <p className="text-xs text-cream/55 -mt-2">
+          Each text has English + Vietnamese. Visitors see the version matching their language.
+        </p>
+
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="Hero headline — line 2">
-            <input className="input-dark" value={s.homeHeroLine2} onChange={(e) => setS({ ...s, homeHeroLine2: e.target.value })} />
+          <Field label="Hero — line 1 (EN)" hint="Shown in large gold gradient.">
+            <input className="input-dark" value={s.homeHeroLine1} onChange={(e) => setS({ ...s, homeHeroLine1: e.target.value })} />
           </Field>
-          <Field label="Hero headline — line 3 (optional)">
-            <input className="input-dark" value={s.homeHeroLine3} onChange={(e) => setS({ ...s, homeHeroLine3: e.target.value })} />
+          <Field label="Hero — line 1 (VN)">
+            <input className="input-dark" value={s.homeHeroLine1Vn} onChange={(e) => setS({ ...s, homeHeroLine1Vn: e.target.value })} />
           </Field>
         </div>
-        <Field label="Hero intro paragraph">
-          <textarea rows={2} className="input-dark" value={s.homeHeroIntro} onChange={(e) => setS({ ...s, homeHeroIntro: e.target.value })} />
-        </Field>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Hero — line 2 (EN)">
+            <input className="input-dark" value={s.homeHeroLine2} onChange={(e) => setS({ ...s, homeHeroLine2: e.target.value })} />
+          </Field>
+          <Field label="Hero — line 2 (VN)">
+            <input className="input-dark" value={s.homeHeroLine2Vn} onChange={(e) => setS({ ...s, homeHeroLine2Vn: e.target.value })} />
+          </Field>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Hero — line 3 (EN, optional)">
+            <input className="input-dark" value={s.homeHeroLine3} onChange={(e) => setS({ ...s, homeHeroLine3: e.target.value })} />
+          </Field>
+          <Field label="Hero — line 3 (VN, optional)">
+            <input className="input-dark" value={s.homeHeroLine3Vn} onChange={(e) => setS({ ...s, homeHeroLine3Vn: e.target.value })} />
+          </Field>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Hero intro paragraph (EN)">
+            <textarea rows={2} className="input-dark" value={s.homeHeroIntro} onChange={(e) => setS({ ...s, homeHeroIntro: e.target.value })} />
+          </Field>
+          <Field label="Hero intro paragraph (VN)">
+            <textarea rows={2} className="input-dark" value={s.homeHeroIntroVn} onChange={(e) => setS({ ...s, homeHeroIntroVn: e.target.value })} />
+          </Field>
+        </div>
 
         <div className="border-t border-gold-900/30 pt-4">
           <p className="text-xs uppercase tracking-widest text-gold-400 font-semibold mb-3">
@@ -190,9 +215,14 @@ export function SettingsForm({ initial }: { initial: SiteSettings }) {
           </div>
         </div>
 
-        <Field label="About page story" hint="Use blank lines to separate paragraphs.">
-          <textarea rows={8} className="input-dark" value={s.aboutStory} onChange={(e) => setS({ ...s, aboutStory: e.target.value })} />
-        </Field>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="About page story (EN)" hint="Use blank lines to separate paragraphs.">
+            <textarea rows={10} className="input-dark" value={s.aboutStory} onChange={(e) => setS({ ...s, aboutStory: e.target.value })} />
+          </Field>
+          <Field label="About page story (VN)" hint="Dùng dòng trống để ngắt đoạn.">
+            <textarea rows={10} className="input-dark" value={s.aboutStoryVn} onChange={(e) => setS({ ...s, aboutStoryVn: e.target.value })} />
+          </Field>
+        </div>
       </Section>
 
       <Section icon={SettingsIcon} title="Operations">
@@ -281,7 +311,7 @@ function MaintenanceSection({ s, setS }: { s: SiteSettings; setS: (s: SiteSettin
       </p>
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className="label-dark">Headline</label>
+          <label className="label-dark">Headline (EN)</label>
           <input
             className="input-dark"
             value={s.maintenanceTitle}
@@ -290,23 +320,41 @@ function MaintenanceSection({ s, setS }: { s: SiteSettings; setS: (s: SiteSettin
           />
         </div>
         <div>
-          <label className="label-dark">
-            <Link href="/maintenance" target="_blank" className="text-gold-300 hover:underline inline-flex items-center gap-1">
-              Preview <ExternalLink className="w-3 h-3" />
-            </Link>
-          </label>
-          <p className="text-xs text-cream/60 italic mt-2">Opens the public Coming Soon page in a new tab.</p>
+          <label className="label-dark">Headline (VN)</label>
+          <input
+            className="input-dark"
+            value={s.maintenanceTitleVn}
+            onChange={(e) => setS({ ...s, maintenanceTitleVn: e.target.value })}
+            placeholder="Chúng tôi đang chuẩn bị điều đặc biệt"
+          />
         </div>
       </div>
-      <div>
-        <label className="label-dark">Message</label>
-        <textarea
-          rows={3}
-          className="input-dark"
-          value={s.maintenanceMessage}
-          onChange={(e) => setS({ ...s, maintenanceMessage: e.target.value })}
-          placeholder="Our website is currently being prepared…"
-        />
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className="label-dark">Message (EN)</label>
+          <textarea
+            rows={3}
+            className="input-dark"
+            value={s.maintenanceMessage}
+            onChange={(e) => setS({ ...s, maintenanceMessage: e.target.value })}
+            placeholder="Our website is currently being prepared…"
+          />
+        </div>
+        <div>
+          <label className="label-dark">Message (VN)</label>
+          <textarea
+            rows={3}
+            className="input-dark"
+            value={s.maintenanceMessageVn}
+            onChange={(e) => setS({ ...s, maintenanceMessageVn: e.target.value })}
+            placeholder="Website đang trong giai đoạn hoàn thiện…"
+          />
+        </div>
+      </div>
+      <div className="text-xs text-cream/60">
+        <Link href="/maintenance" target="_blank" className="text-gold-300 hover:underline inline-flex items-center gap-1">
+          Preview Coming Soon page <ExternalLink className="w-3 h-3" />
+        </Link>
       </div>
     </section>
   );

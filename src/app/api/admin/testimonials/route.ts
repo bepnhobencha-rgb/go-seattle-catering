@@ -9,6 +9,7 @@ const Body = z.object({
   role: z.string().max(120).default(""),
   rating: z.number().int().min(1).max(5).default(5),
   text: z.string().min(1).max(2000),
+  textVn: z.string().max(2000).default(""),
   isActive: z.boolean().default(true),
   displayOrder: z.number().int().default(0),
 });

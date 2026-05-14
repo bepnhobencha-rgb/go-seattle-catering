@@ -26,6 +26,13 @@ export type SiteSettings = {
   homeHeroIntro: string;
   aboutStory: string;
 
+  // Vietnamese versions
+  homeHeroLine1Vn: string;
+  homeHeroLine2Vn: string;
+  homeHeroLine3Vn: string;
+  homeHeroIntroVn: string;
+  aboutStoryVn: string;
+
   // Hero images
   heroMainImage: string;
   heroFloat1Image: string;
@@ -46,6 +53,8 @@ export type SiteSettings = {
   maintenanceMode: boolean;
   maintenanceTitle: string;
   maintenanceMessage: string;
+  maintenanceTitleVn: string;
+  maintenanceMessageVn: string;
 
   // Email (Resend)
   resendApiKey: string;
@@ -88,6 +97,13 @@ export const SITE_DEFAULTS: SiteSettings = {
   homeHeroIntro: "Hương Vị Việt — bringing the authentic taste of Vietnam to your table with love and care.",
   aboutStory:
     "Gõ Seattle Catering was born from a simple belief: food cooked with love feeds the soul. We bring the rich, vibrant flavors of Vietnam — from the bustling street food of Saigon to the comforting family meals of the Mekong Delta — to tables all across Seattle.\n\nWhether you're planning an unforgettable wedding, a corporate luncheon, a private celebration, or a Sunday family gathering, our team crafts custom Vietnamese menus that honor tradition and delight every guest. We serve parties from 10 to 500+.\n\nEvery spring roll is hand-rolled. Every bowl of phở begins with a broth that simmers for hours. Every detail of presentation reflects our pride in our heritage and our commitment to your special day.",
+
+  homeHeroLine1Vn: "Nấu bằng cả tấm lòng",
+  homeHeroLine2Vn: "là món ăn",
+  homeHeroLine3Vn: "dành cho tâm hồn",
+  homeHeroIntroVn: "Hương Vị Việt — mang hương vị Việt Nam đến bàn tiệc của bạn với tất cả sự yêu thương và chăm chút.",
+  aboutStoryVn:
+    "Gõ Seattle Catering được sinh ra từ một niềm tin giản dị: món ăn được nấu bằng cả tấm lòng nuôi dưỡng tâm hồn. Chúng tôi mang hương vị Việt phong phú, đậm đà — từ ẩm thực đường phố sôi động của Sài Gòn đến những bữa cơm gia đình ấm cúng của miền Tây — đến bàn tiệc khắp Seattle.\n\nDù bạn đang chuẩn bị một đám cưới đáng nhớ, một buổi tiệc văn phòng, một lễ kỷ niệm thân mật, hay một buổi họp mặt gia đình cuối tuần — đội ngũ chúng tôi soạn menu Việt riêng cho từng sự kiện, tôn vinh truyền thống và làm hài lòng mọi thực khách. Chúng tôi phục vụ từ 10 đến 500+ khách.\n\nMỗi cuốn gỏi cuốn được cuốn tay. Mỗi tô phở bắt đầu từ nồi nước dùng ninh hàng giờ. Mỗi chi tiết trình bày đều thể hiện niềm tự hào về di sản và sự cam kết của chúng tôi với ngày đặc biệt của bạn.",
   heroMainImage: "/images/food/banh-mi-tray.jpg",
   heroFloat1Image: "/images/food/spring-rolls.jpg",
   heroFloat1Label: "Gỏi Cuốn · $7.85",
@@ -106,6 +122,9 @@ export const SITE_DEFAULTS: SiteSettings = {
   maintenanceTitle: "We're crafting something special",
   maintenanceMessage:
     "Our website is currently being prepared. We'll be ready to welcome you very soon. In the meantime, feel free to reach out for catering inquiries.",
+  maintenanceTitleVn: "Chúng tôi đang chuẩn bị điều đặc biệt",
+  maintenanceMessageVn:
+    "Website đang trong giai đoạn hoàn thiện. Chúng tôi sẽ sẵn sàng đón tiếp bạn rất sớm. Trong thời gian này, vui lòng liên hệ trực tiếp cho mọi yêu cầu đặt tiệc.",
 
   resendApiKey: "",
   notifyEmail: "",
@@ -162,6 +181,11 @@ export async function getSettings(): Promise<SiteSettings> {
     homeHeroLine3: row.homeHeroLine3,
     homeHeroIntro: row.homeHeroIntro,
     aboutStory: row.aboutStory,
+    homeHeroLine1Vn: row.homeHeroLine1Vn || SITE_DEFAULTS.homeHeroLine1Vn,
+    homeHeroLine2Vn: row.homeHeroLine2Vn || SITE_DEFAULTS.homeHeroLine2Vn,
+    homeHeroLine3Vn: row.homeHeroLine3Vn || SITE_DEFAULTS.homeHeroLine3Vn,
+    homeHeroIntroVn: row.homeHeroIntroVn || SITE_DEFAULTS.homeHeroIntroVn,
+    aboutStoryVn: row.aboutStoryVn || SITE_DEFAULTS.aboutStoryVn,
 
     heroMainImage: row.heroMainImage || SITE_DEFAULTS.heroMainImage,
     heroFloat1Image: row.heroFloat1Image || SITE_DEFAULTS.heroFloat1Image,
@@ -180,6 +204,8 @@ export async function getSettings(): Promise<SiteSettings> {
     maintenanceMode: row.maintenanceMode,
     maintenanceTitle: row.maintenanceTitle,
     maintenanceMessage: row.maintenanceMessage,
+    maintenanceTitleVn: row.maintenanceTitleVn || SITE_DEFAULTS.maintenanceTitleVn,
+    maintenanceMessageVn: row.maintenanceMessageVn || SITE_DEFAULTS.maintenanceMessageVn,
 
     resendApiKey: row.resendApiKey,
     notifyEmail: row.notifyEmail,
@@ -211,6 +237,11 @@ export function toPublicSettings(s: SiteSettings) {
     homeHeroLine3: s.homeHeroLine3,
     homeHeroIntro: s.homeHeroIntro,
     aboutStory: s.aboutStory,
+    homeHeroLine1Vn: s.homeHeroLine1Vn,
+    homeHeroLine2Vn: s.homeHeroLine2Vn,
+    homeHeroLine3Vn: s.homeHeroLine3Vn,
+    homeHeroIntroVn: s.homeHeroIntroVn,
+    aboutStoryVn: s.aboutStoryVn,
     heroMainImage: s.heroMainImage,
     heroFloat1Image: s.heroFloat1Image,
     heroFloat1Label: s.heroFloat1Label,
@@ -226,9 +257,21 @@ export function toPublicSettings(s: SiteSettings) {
     maintenanceMode: s.maintenanceMode,
     maintenanceTitle: s.maintenanceTitle,
     maintenanceMessage: s.maintenanceMessage,
+    maintenanceTitleVn: s.maintenanceTitleVn,
+    maintenanceMessageVn: s.maintenanceMessageVn,
     notifyEmail: s.notifyEmail, // safe to expose
     stripeEnabled: s.stripeEnabled,
     stripeMode: s.stripeMode,
     stripePublishableKey: s.stripePublishableKey, // safe to expose
   };
+}
+
+/** Pick the lang-appropriate value, falling back to the other lang if the chosen one is blank. */
+export function localized<T extends Record<string, unknown>>(s: T, key: string, lang: "en" | "vn"): string {
+  if (lang === "vn") {
+    const v = (s as Record<string, unknown>)[`${key}Vn`];
+    if (typeof v === "string" && v.trim()) return v;
+  }
+  const en = (s as Record<string, unknown>)[key];
+  return typeof en === "string" ? en : "";
 }

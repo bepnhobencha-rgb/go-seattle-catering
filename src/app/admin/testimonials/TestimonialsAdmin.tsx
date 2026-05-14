@@ -11,6 +11,7 @@ type T = {
   role: string;
   rating: number;
   text: string;
+  textVn?: string;
   isActive: boolean;
   displayOrder: number;
 };
@@ -22,7 +23,7 @@ export function TestimonialsAdmin({ initial }: { initial: T[] }) {
   const [loading, setLoading] = useState(false);
 
   function startNew() {
-    setEditing({ name: "", role: "", rating: 5, text: "", isActive: true, displayOrder: items.length });
+    setEditing({ name: "", role: "", rating: 5, text: "", textVn: "", isActive: true, displayOrder: items.length });
   }
 
   async function save() {
@@ -186,7 +187,7 @@ export function TestimonialsAdmin({ initial }: { initial: T[] }) {
                 </div>
               </div>
               <div>
-                <label className="label-dark">Review *</label>
+                <label className="label-dark">Review (EN) *</label>
                 <textarea
                   rows={4}
                   className="input-dark"
@@ -194,6 +195,17 @@ export function TestimonialsAdmin({ initial }: { initial: T[] }) {
                   onChange={(e) => setEditing({ ...editing, text: e.target.value })}
                   placeholder="The food was amazing…"
                 />
+              </div>
+              <div>
+                <label className="label-dark">Review (VN, optional)</label>
+                <textarea
+                  rows={4}
+                  className="input-dark"
+                  value={editing.textVn ?? ""}
+                  onChange={(e) => setEditing({ ...editing, textVn: e.target.value })}
+                  placeholder="Món ăn tuyệt vời…"
+                />
+                <p className="text-[10px] text-cream/50 mt-1">If blank, English text shows for both languages.</p>
               </div>
               <div>
                 <label className="label-dark">Display order</label>
