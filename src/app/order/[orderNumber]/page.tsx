@@ -23,16 +23,12 @@ export default async function OrderConfirmation({
   });
   if (!order) notFound();
 
-  // If we just returned from Stripe successful checkout and DB still says UNPAID,
-  // optimistically flip it (webhook will reconcile authoritatively).
-  let paymentStatus = order.paymentStatus;
-  if (searchParams.paid === "1" && paymentStatus === "UNPAID" && order.paymentMethod === "STRIPE") {
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { paymentStatus: "PAID" },
-    });
-    paymentStatus = "PAID";
-  }
+  // Payment status is the source of truth from DB (updated by Stripe webhook).
+  // We DO NOT trust the ?paid=1 URL param — a customer could forge that to
+  // mark an order paid without actually paying. We only show a friendly
+  // "verifying payment" hint if they just came back from Stripe.
+  const paymentStatus = order.paymentStatus;
+  const justReturnedFromStripe = searchParams.paid === "1" && order.paymentMethod === "STRIPE";
 
   const status = order.status as OrderStatus;
   const settings = await maintenanceGate();
@@ -75,7 +71,13 @@ export default async function OrderConfirmation({
                 : "bg-yellow-500/15 text-yellow-300 border-yellow-500/40"
             }`}
           >
-            {isStripe ? (isPaid ? t.orderPaidOnline : t.orderAwaitingPayment) : t.orderPayAtPickupLabel}
+            {isStripe
+              ? isPaid
+                ? t.orderPaidOnline
+                : justReturnedFromStripe
+                ? (lang === "vn" ? "Đang xác minh thanh toán…" : "Verifying payment…")
+                : t.orderAwaitingPayment
+              : t.orderPayAtPickupLabel}
           </span>
         </div>
         <div className="flex items-center gap-2 text-cream/85 text-sm">

@@ -50,20 +50,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verify items exist and compute subtotal server-side
+    // Verify items exist and compute subtotal server-side from DB prices
+    // (NEVER trust client-supplied prices — security)
     const ids = data.items.map((i) => i.menuItemId);
-    const menuItems = await prisma.menuItem.findMany({ where: { id: { in: ids }, isActive: true } });
+    const [menuItems, allToppings] = await Promise.all([
+      prisma.menuItem.findMany({ where: { id: { in: ids }, isActive: true } }),
+      prisma.topping.findMany({ where: { isActive: true } }),
+    ]);
     const menuMap = new Map(menuItems.map((m) => [m.id, m]));
+    const toppingMap = new Map(allToppings.map((t) => [t.id, t]));
 
     let subtotal = 0;
-    for (const i of data.items) {
+    // Sanitized items: server-trusted prices, used both for total + Stripe lineitems
+    const sanitizedItems = data.items.map((i) => {
       const mi = menuMap.get(i.menuItemId);
-      if (!mi) {
-        return NextResponse.json({ error: "Menu item not available" }, { status: 400 });
-      }
-      const topT = i.toppings.reduce((s, t) => s + t.price, 0);
+      if (!mi) throw new Error("Menu item not available");
+      // Re-resolve toppings against DB; ignore any client price
+      const trustedToppings = i.toppings
+        .map((t) => toppingMap.get(t.id))
+        .filter((t): t is NonNullable<typeof t> => !!t)
+        .map((t) => ({ id: t.id, name: t.name, price: t.price }));
+      const topT = trustedToppings.reduce((s, t) => s + t.price, 0);
       subtotal += (mi.basePrice + topT) * i.quantity;
-    }
+      return {
+        menuItemId: mi.id,
+        unitPrice: mi.basePrice,
+        quantity: i.quantity,
+        toppings: trustedToppings,
+        notes: i.notes,
+      };
+    });
     subtotal = Math.round(subtotal * 100) / 100;
     const tax = calcTax(subtotal, settings.taxRate);
     const total = Math.round((subtotal + tax) * 100) / 100;
@@ -93,16 +109,13 @@ export async function POST(req: NextRequest) {
         paymentMethod,
         paymentStatus: "UNPAID",
         items: {
-          create: data.items.map((i) => {
-            const mi = menuMap.get(i.menuItemId)!;
-            return {
-              menuItemId: mi.id,
-              quantity: i.quantity,
-              unitPrice: mi.basePrice,
-              toppings: i.toppings.length ? JSON.stringify(i.toppings) : null,
-              notes: i.notes,
-            };
-          }),
+          create: sanitizedItems.map((i) => ({
+            menuItemId: i.menuItemId,
+            quantity: i.quantity,
+            unitPrice: i.unitPrice,
+            toppings: i.toppings.length ? JSON.stringify(i.toppings) : null,
+            notes: i.notes,
+          })),
         },
       },
       include: { items: { include: { menuItem: true } } },
