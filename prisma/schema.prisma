@@ -42,18 +42,19 @@ model Category {
 }
 
 model MenuItem {
-  id           String   @id @default(cuid())
-  categoryId   String
-  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  code         String?
-  nameEn       String
-  nameVn       String?
-  description  String?
-  basePrice    Float
-  image        String?
-  isActive     Boolean  @default(true)
-  isFeatured   Boolean  @default(false)
-  displayOrder Int      @default(0)
+  id             String   @id @default(cuid())
+  categoryId     String
+  category       Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  code           String?
+  nameEn         String
+  nameVn         String?
+  description    String?
+  descriptionVn  String?
+  basePrice      Float
+  image          String?
+  isActive       Boolean  @default(true)
+  isFeatured     Boolean  @default(false)
+  displayOrder   Int      @default(0)
 
   orderItems OrderItem[]
 

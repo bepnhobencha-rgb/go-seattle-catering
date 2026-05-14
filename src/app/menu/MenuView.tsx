@@ -15,6 +15,7 @@ type MenuItem = {
   nameEn: string;
   nameVn: string | null;
   description: string | null;
+  descriptionVn: string | null;
   basePrice: number;
   image: string | null;
 };
@@ -181,8 +182,10 @@ function ItemCard({ item, lang, onSelect }: { item: MenuItem; lang: Lang; onSele
             {item.code && <p className="text-xs text-gold-500/80 font-mono">{item.code}</p>}
             <h3 className="font-display font-bold text-lg text-cream mt-0.5">{primary}</h3>
             {secondary && <p className="text-sm text-gold-300/70 italic truncate">{secondary}</p>}
-            {item.description && (
-              <p className="text-xs text-cream/60 mt-2 line-clamp-2">{item.description}</p>
+            {(lang === "vn" && item.descriptionVn ? item.descriptionVn : item.description) && (
+              <p className="text-xs text-cream/60 mt-2 line-clamp-2">
+                {lang === "vn" && item.descriptionVn ? item.descriptionVn : item.description}
+              </p>
             )}
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">
@@ -288,8 +291,10 @@ function ItemModal({
             <span className="text-2xl text-gold-300 font-display font-bold">{formatUSD(item.basePrice)}</span>
           </div>
 
-          {item.description && (
-            <p className="mt-3 text-sm text-cream/75">{item.description}</p>
+          {(lang === "vn" && item.descriptionVn ? item.descriptionVn : item.description) && (
+            <p className="mt-3 text-sm text-cream/75">
+              {lang === "vn" && item.descriptionVn ? item.descriptionVn : item.description}
+            </p>
           )}
 
           {toppings.length > 0 && (
