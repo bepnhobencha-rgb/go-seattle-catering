@@ -6,7 +6,9 @@ import { dict } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "Contact — Gõ Seattle Catering",
+  title: "Contact us — Phone, email, hours, address",
+  description:
+    "Get in touch with Gõ Seattle Catering. Phone, email, address, hours, Facebook. Questions about an order or planning a special event? We'd love to hear from you.",
 };
 
 export default async function ContactPage() {

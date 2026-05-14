@@ -7,7 +7,9 @@ import { dict, interpolate } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "Catering — Gõ Seattle Catering",
+  title: "Event Catering — Weddings, Parties, Corporate",
+  description:
+    "Request a Vietnamese catering quote for weddings, private parties, corporate events or family gatherings in Seattle. Custom menus from 10 to 500+ guests.",
 };
 
 export const revalidate = 0;
