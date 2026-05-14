@@ -29,7 +29,7 @@ type Category = {
   items: MenuItem[];
 };
 
-type Topping = { id: string; name: string; nameVn: string; price: number };
+type Topping = { id: string; name: string; nameVn: string; price: number; categoryIds: string[] };
 
 // Professional banner photo per category
 const CATEGORY_BANNERS: Record<string, string> = {
@@ -140,7 +140,11 @@ export function MenuView({
         <ItemModal
           item={selected}
           category={selectedCategory}
-          toppings={selectedCategory.allowsToppings ? toppings : []}
+          toppings={
+            selectedCategory.allowsToppings
+              ? toppings.filter((tp) => tp.categoryIds.includes(selectedCategory.id))
+              : []
+          }
           lang={lang}
           t={t}
           onClose={() => {

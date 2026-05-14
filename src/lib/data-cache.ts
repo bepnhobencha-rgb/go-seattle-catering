@@ -70,10 +70,18 @@ export const getActiveTestimonials = cache(_getActiveTestimonials);
 
 const _getActiveToppings = unstable_cache(
   async () => {
-    return prisma.topping.findMany({
+    const rows = await prisma.topping.findMany({
       where: { isActive: true },
-      orderBy: { price: "asc" },
+      include: { categories: { select: { id: true } } },
+      orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
     });
+    return rows.map((t) => ({
+      id: t.id,
+      name: t.name,
+      nameVn: t.nameVn,
+      price: t.price,
+      categoryIds: t.categories.map((c) => c.id),
+    }));
   },
   ["active-toppings"],
   { tags: ["menu"], revalidate: 300 }

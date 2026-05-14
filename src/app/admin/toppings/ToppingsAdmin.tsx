@@ -13,12 +13,32 @@ type T = {
   price: number;
   isActive: boolean;
   displayOrder: number;
+  categoryIds: string[];
 };
 
-export function ToppingsAdmin({ initial }: { initial: T[] }) {
+type Cat = {
+  id: string;
+  nameEn: string;
+  nameVn: string;
+  allowsToppings: boolean;
+};
+
+export function ToppingsAdmin({ initial, categories }: { initial: T[]; categories: Cat[] }) {
   const router = useRouter();
   const [items, setItems] = useState<T[]>(initial);
   const [editing, setEditing] = useState<Partial<T> | null>(null);
+
+  function startNew() {
+    setEditing({
+      name: "",
+      nameVn: "",
+      price: 0.75,
+      isActive: true,
+      displayOrder: items.length,
+      // Default: assign to every category that already allows toppings.
+      categoryIds: categories.filter((c) => c.allowsToppings).map((c) => c.id),
+    });
+  }
 
   async function save() {
     if (!editing?.name || editing.price === undefined || editing.price === null) {
@@ -35,10 +55,12 @@ export function ToppingsAdmin({ initial }: { initial: T[] }) {
         price: editing.price,
         isActive: editing.isActive ?? true,
         displayOrder: editing.displayOrder ?? items.length,
+        categoryIds: editing.categoryIds ?? [],
       }),
     });
     if (!res.ok) {
-      toast("Save failed", "error");
+      const data = await res.json().catch(() => ({}));
+      toast(data.error || "Save failed", "error");
       return;
     }
     const data = await res.json();
@@ -100,63 +122,67 @@ export function ToppingsAdmin({ initial }: { initial: T[] }) {
 
   const sorted = [...items].sort((a, b) => a.displayOrder - b.displayOrder);
 
+  function toggleCategoryAssignment(catId: string) {
+    if (!editing) return;
+    const cur = editing.categoryIds ?? [];
+    const next = cur.includes(catId) ? cur.filter((x) => x !== catId) : [...cur, catId];
+    setEditing({ ...editing, categoryIds: next });
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <p className="text-sm text-cream/65">
-            Toppings shown when ordering items in categories with &quot;Allows toppings&quot; enabled. Pricing applies per-customer per-add.
-          </p>
+        <div className="max-w-2xl text-sm text-cream/65">
+          Toppings shown to customers ordering items in their assigned categories. A topping with no categories selected is hidden from everyone.
         </div>
-        <button
-          onClick={() => setEditing({ name: "", nameVn: "", price: 0.75, isActive: true, displayOrder: items.length })}
-          className="btn-gold !px-4 !py-2 text-sm"
-        >
+        <button onClick={startNew} className="btn-gold !px-4 !py-2 text-sm">
           <Plus className="w-4 h-4" /> New topping
         </button>
       </div>
 
       <div className="card divide-y divide-gold-900/40">
-        {sorted.length === 0 && (
-          <div className="p-10 text-center text-cream/60">No toppings yet.</div>
-        )}
-        {sorted.map((t, i) => (
-          <div key={t.id} className="px-4 py-3 flex items-center gap-3">
-            <div className="flex flex-col gap-0.5">
-              <button onClick={() => reorder(t, -1)} disabled={i === 0} className="text-cream/40 hover:text-gold-300 disabled:opacity-20 disabled:cursor-not-allowed">
-                <ChevronUp className="w-3.5 h-3.5" />
+        {sorted.length === 0 && <div className="p-10 text-center text-cream/60">No toppings yet.</div>}
+        {sorted.map((t, i) => {
+          const assignedNames = categories
+            .filter((c) => t.categoryIds.includes(c.id))
+            .map((c) => c.nameEn);
+          return (
+            <div key={t.id} className="px-4 py-3 flex items-center gap-3">
+              <div className="flex flex-col gap-0.5">
+                <button onClick={() => reorder(t, -1)} disabled={i === 0} className="text-cream/40 hover:text-gold-300 disabled:opacity-20 disabled:cursor-not-allowed">
+                  <ChevronUp className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => reorder(t, 1)} disabled={i === sorted.length - 1} className="text-cream/40 hover:text-gold-300 disabled:opacity-20 disabled:cursor-not-allowed">
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-cream">
+                  {t.name}
+                  {t.nameVn && <span className="text-gold-300/70 italic font-normal"> · {t.nameVn}</span>}
+                </p>
+                <p className="text-xs text-cream/55 truncate">
+                  {assignedNames.length > 0 ? `→ ${assignedNames.join(", ")}` : <span className="text-yellow-400/70">⚠ Not assigned to any category</span>}
+                </p>
+              </div>
+              <span className="text-gold-300 font-bold w-20 text-right">{formatUSD(t.price)}</span>
+              <button onClick={() => toggleActive(t)} className={`p-1.5 rounded-md ${t.isActive ? "text-green-400 hover:bg-green-500/15" : "text-cream/40 hover:bg-cream/10"}`} title={t.isActive ? "Visible" : "Hidden"}>
+                {t.isActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
               </button>
-              <button onClick={() => reorder(t, 1)} disabled={i === sorted.length - 1} className="text-cream/40 hover:text-gold-300 disabled:opacity-20 disabled:cursor-not-allowed">
-                <ChevronDown className="w-3.5 h-3.5" />
+              <button onClick={() => setEditing(t)} className="p-1.5 rounded-md text-gold-300 hover:bg-gold-500/15" title="Edit">
+                <Edit3 className="w-4 h-4" />
+              </button>
+              <button onClick={() => remove(t)} className="p-1.5 rounded-md text-red-300 hover:bg-red-500/15" title="Delete">
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-cream">
-                {t.name}
-                {t.nameVn && <span className="text-gold-300/70 italic font-normal"> · {t.nameVn}</span>}
-              </p>
-            </div>
-            <span className="text-gold-300 font-bold w-20 text-right">{formatUSD(t.price)}</span>
-            <button
-              onClick={() => toggleActive(t)}
-              className={`p-1.5 rounded-md ${t.isActive ? "text-green-400 hover:bg-green-500/15" : "text-cream/40 hover:bg-cream/10"}`}
-              title={t.isActive ? "Visible" : "Hidden"}
-            >
-              {t.isActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-            </button>
-            <button onClick={() => setEditing(t)} className="p-1.5 rounded-md text-gold-300 hover:bg-gold-500/15" title="Edit">
-              <Edit3 className="w-4 h-4" />
-            </button>
-            <button onClick={() => remove(t)} className="p-1.5 rounded-md text-red-300 hover:bg-red-500/15" title="Delete">
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {editing && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setEditing(null)}>
-          <div className="card w-full max-w-md p-6 border-gold-500/40 shadow-gold-lg space-y-4" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto" onClick={() => setEditing(null)}>
+          <div className="card w-full max-w-lg p-6 my-8 border-gold-500/40 shadow-gold-lg space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h3 className="font-display text-xl font-bold text-gold-200">
                 {editing.id ? "Edit topping" : "New topping"}
@@ -186,11 +212,49 @@ export function ToppingsAdmin({ initial }: { initial: T[] }) {
                 onChange={(e) => setEditing({ ...editing, price: parseFloat(e.target.value || "0") })}
               />
             </div>
+
+            <div>
+              <label className="label-dark mb-2">Available in categories</label>
+              <p className="text-[10px] text-cream/55 mb-2">
+                Pick which menu categories will show this topping. Only categories with &quot;Allows toppings&quot; enabled work — others are greyed out.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-60 overflow-y-auto p-2 rounded-md border border-gold-900/40 bg-ink-950/50">
+                {categories.map((c) => {
+                  const selected = (editing.categoryIds ?? []).includes(c.id);
+                  const enabled = c.allowsToppings;
+                  return (
+                    <label
+                      key={c.id}
+                      className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                        selected ? "bg-gold-500/15 border border-gold-500/40" : "border border-transparent hover:bg-gold-500/5"
+                      } ${!enabled ? "opacity-50" : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() => toggleCategoryAssignment(c.id)}
+                        className="accent-gold-500"
+                      />
+                      <span className="text-sm text-cream">
+                        {c.nameEn} <span className="text-gold-300/60 italic">{c.nameVn}</span>
+                        {!enabled && <span className="text-[10px] ml-1 text-yellow-400/70">(needs &quot;Allows toppings&quot;)</span>}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
             <label className="inline-flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={editing.isActive ?? true} onChange={(e) => setEditing({ ...editing, isActive: e.target.checked })} className="accent-gold-500" />
+              <input
+                type="checkbox"
+                checked={editing.isActive ?? true}
+                onChange={(e) => setEditing({ ...editing, isActive: e.target.checked })}
+                className="accent-gold-500"
+              />
               <span className="text-sm text-cream/85">Visible to customers</span>
             </label>
-            <div className="flex gap-2 justify-end pt-2">
+            <div className="flex gap-2 justify-end pt-2 border-t border-gold-900/30">
               <button onClick={() => setEditing(null)} className="btn-outline-gold !px-4 !py-2 text-sm">Cancel</button>
               <button onClick={save} className="btn-gold !px-4 !py-2 text-sm">
                 <Save className="w-4 h-4" /> {editing.id ? "Save" : "Create"}

@@ -11,6 +11,7 @@ const Body = z.object({
   price: z.number().nonnegative().optional(),
   isActive: z.boolean().optional(),
   displayOrder: z.number().int().optional(),
+  categoryIds: z.array(z.string()).optional(),
 });
 
 async function requireAdmin() {
@@ -21,10 +22,22 @@ async function requireAdmin() {
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   if (!(await requireAdmin())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   try {
-    const data = Body.parse(await req.json());
-    const topping = await prisma.topping.update({ where: { id: params.id }, data });
+    const { categoryIds, ...rest } = Body.parse(await req.json());
+    const topping = await prisma.topping.update({
+      where: { id: params.id },
+      data: {
+        ...rest,
+        ...(categoryIds !== undefined && {
+          categories: { set: categoryIds.map((id) => ({ id })) },
+        }),
+      },
+      include: { categories: { select: { id: true } } },
+    });
     revalidateTag("menu");
-    return NextResponse.json({ ok: true, topping });
+    return NextResponse.json({
+      ok: true,
+      topping: { ...topping, categoryIds: topping.categories.map((c) => c.id) },
+    });
   } catch (err) {
     if (err instanceof z.ZodError) return NextResponse.json({ error: "Invalid" }, { status: 400 });
     return NextResponse.json({ error: "Server error" }, { status: 500 });

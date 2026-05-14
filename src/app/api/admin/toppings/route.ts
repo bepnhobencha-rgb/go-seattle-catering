@@ -11,6 +11,7 @@ const Body = z.object({
   price: z.number().nonnegative(),
   isActive: z.boolean().default(true),
   displayOrder: z.number().int().optional(),
+  categoryIds: z.array(z.string()).default([]),
 });
 
 export async function POST(req: NextRequest) {
@@ -19,12 +20,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   try {
-    const data = Body.parse(await req.json());
+    const { categoryIds, ...rest } = Body.parse(await req.json());
     const max = await prisma.topping.aggregate({ _max: { displayOrder: true } });
-    const displayOrder = data.displayOrder ?? (max._max.displayOrder ?? -1) + 1;
-    const topping = await prisma.topping.create({ data: { ...data, displayOrder } });
+    const displayOrder = rest.displayOrder ?? (max._max.displayOrder ?? -1) + 1;
+    const topping = await prisma.topping.create({
+      data: {
+        ...rest,
+        displayOrder,
+        categories: { connect: categoryIds.map((id) => ({ id })) },
+      },
+      include: { categories: { select: { id: true } } },
+    });
     revalidateTag("menu");
-    return NextResponse.json({ ok: true, topping });
+    return NextResponse.json({
+      ok: true,
+      topping: { ...topping, categoryIds: topping.categories.map((c) => c.id) },
+    });
   } catch (err) {
     if (err instanceof z.ZodError) return NextResponse.json({ error: "Invalid" }, { status: 400 });
     return NextResponse.json({ error: "Server error" }, { status: 500 });
