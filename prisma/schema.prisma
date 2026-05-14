@@ -158,6 +158,10 @@ model Settings {
   maintenanceTitle   String  @default("We're crafting something special")
   maintenanceMessage String  @default("Our website is currently being prepared. We'll be ready to welcome you very soon. In the meantime, feel free to reach out for catering inquiries.")
 
+  // Email notifications (Resend)
+  resendApiKey  String  @default("")
+  notifyEmail   String  @default("") // Where to send new-order/catering/contact notifications. Defaults to settings.email if empty.
+
   // Stripe (test or live)
   stripeEnabled         Boolean @default(false)
   stripeMode            String  @default("test") // "test" | "live"
@@ -166,6 +170,19 @@ model Settings {
   stripeWebhookSecret   String  @default("")
 
   updatedAt DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([isRead])
+  @@index([createdAt])
 }
 
 model Testimonial {

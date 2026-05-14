@@ -6,6 +6,7 @@ import { EVENT_TYPES, SERVICE_STYLES } from "@/lib/enums";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getSettings } from "@/lib/settings";
+import { notifyNewCatering } from "@/lib/email";
 
 const Body = z.object({
   eventType: z.enum(EVENT_TYPES),
@@ -62,6 +63,8 @@ export async function POST(req: NextRequest) {
     });
 
     console.log(`[Catering] New request ${requestNumber} from ${data.email}, ${data.guestCount} guests`);
+    notifyNewCatering(settings, cr).catch((err) => console.error("[Catering email] failed", err));
+
     return NextResponse.json({ ok: true, requestNumber: cr.requestNumber, id: cr.id });
   } catch (err) {
     if (err instanceof z.ZodError) {

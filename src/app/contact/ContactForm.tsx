@@ -11,10 +11,27 @@ export function ContactForm({ t }: { t: Dict }) {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setLoading(false);
-    (e.target as HTMLFormElement).reset();
-    toast(t.contactSent, "success");
+    const fd = new FormData(e.currentTarget);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fd.get("name"),
+          email: fd.get("email"),
+          phone: fd.get("phone") || undefined,
+          message: fd.get("message"),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || t.toastSomethingWrong);
+      (e.target as HTMLFormElement).reset();
+      toast(t.contactSent, "success");
+    } catch (err) {
+      toast(err instanceof Error ? err.message : t.toastSomethingWrong, "error");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

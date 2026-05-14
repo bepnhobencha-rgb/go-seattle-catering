@@ -7,7 +7,7 @@ import { toast } from "@/components/Toaster";
 import {
   Save, Trash2, Plus, CheckCircle2, AlertCircle, Loader2, Upload, X, ImageIcon,
   Building2, MapPin, Clock, Type, Settings as SettingsIcon, CreditCard, Eye, EyeOff,
-  Construction, ExternalLink,
+  Construction, ExternalLink, Mail,
 } from "lucide-react";
 import Link from "next/link";
 import type { SiteSettings, Hour } from "@/lib/settings";
@@ -232,6 +232,8 @@ export function SettingsForm({ initial }: { initial: SiteSettings }) {
           </Field>
         </div>
       </Section>
+
+      <EmailSection s={s} setS={setS} />
 
       <PaymentSection s={s} setS={setS} />
 
@@ -502,6 +504,115 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
       {children}
       {hint && <p className="text-[10px] text-cream/50 mt-1">{hint}</p>}
     </div>
+  );
+}
+
+function EmailSection({ s, setS }: { s: SiteSettings; setS: (s: SiteSettings) => void }) {
+  const [showKey, setShowKey] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+
+  async function testConn() {
+    if (!s.resendApiKey || s.resendApiKey === "***") {
+      setTestResult({ ok: false, message: "Save the API key first, then test." });
+      return;
+    }
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const res = await fetch("/api/admin/email/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey: s.resendApiKey }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setTestResult({
+          ok: true,
+          message: `Connected. ${data.domains?.data?.length ? data.domains.data.length + " domain(s) registered" : "Using shared sandbox sender (onboarding@resend.dev)"}.`,
+        });
+      } else {
+        setTestResult({ ok: false, message: data.error || "Failed" });
+      }
+    } catch (err) {
+      setTestResult({ ok: false, message: err instanceof Error ? err.message : "Failed" });
+    } finally {
+      setTesting(false);
+    }
+  }
+
+  return (
+    <section className="card p-6 space-y-4">
+      <h3 className="font-display text-lg font-bold text-gold-200 flex items-center gap-2">
+        <Mail className="w-5 h-5" /> Email notifications · Resend
+      </h3>
+      <p className="text-xs text-cream/65">
+        When a customer places an order, requests catering, or sends a message — we email you.
+        Get a free Resend API key at <span className="text-gold-300">resend.com</span> (100 emails/day free).
+      </p>
+
+      <Field
+        label="Notification email"
+        hint="Where new-order / catering / contact emails are delivered. Defaults to the contact email above if empty."
+      >
+        <input
+          className="input-dark"
+          type="email"
+          value={s.notifyEmail}
+          onChange={(e) => setS({ ...s, notifyEmail: e.target.value })}
+          placeholder="govietcatering@gmail.com"
+        />
+      </Field>
+
+      <Field label="Resend API key" hint="Starts with re_… — never shared publicly">
+        <div className="relative">
+          <input
+            type={showKey ? "text" : "password"}
+            className="input-dark font-mono text-xs pr-10"
+            value={s.resendApiKey}
+            onChange={(e) => setS({ ...s, resendApiKey: e.target.value })}
+            placeholder="re_…"
+          />
+          <button
+            type="button"
+            onClick={() => setShowKey((v) => !v)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gold-300 hover:text-gold-200"
+            aria-label="Toggle visibility"
+          >
+            {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        </div>
+      </Field>
+
+      <div className="flex items-start gap-3 flex-wrap">
+        <button
+          type="button"
+          onClick={testConn}
+          disabled={testing || !s.resendApiKey}
+          className="btn-outline-gold !px-4 !py-2 text-xs disabled:opacity-50"
+        >
+          {testing ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Testing…</> : "Test connection"}
+        </button>
+        {testResult && (
+          <div className={`text-xs px-3 py-2 rounded-md border flex items-start gap-2 ${
+            testResult.ok ? "bg-green-500/10 border-green-500/40 text-green-200" : "bg-red-500/10 border-red-500/40 text-red-200"
+          }`}>
+            {testResult.ok ? <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" /> : <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />}
+            {testResult.message}
+          </div>
+        )}
+      </div>
+
+      <div className="text-xs text-cream/55 bg-ink-950/50 border border-gold-900/30 rounded-md p-3 space-y-1">
+        <p><strong className="text-gold-300">Setup:</strong></p>
+        <ol className="list-decimal pl-5 space-y-0.5">
+          <li>Sign up free at <span className="text-gold-300">resend.com</span></li>
+          <li>API Keys → Create → copy key (starts with <code>re_</code>) → paste above</li>
+          <li>Set Notification email → Test connection → Save</li>
+          <li>Until you verify your own domain in Resend, emails come from a shared sandbox sender. To use <code>{s.email || "your-domain.com"}</code> as the From address, add and verify your domain in the Resend dashboard.</li>
+        </ol>
+      </div>
+    </section>
   );
 }
 

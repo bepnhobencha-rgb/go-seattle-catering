@@ -47,6 +47,10 @@ export type SiteSettings = {
   maintenanceTitle: string;
   maintenanceMessage: string;
 
+  // Email (Resend)
+  resendApiKey: string;
+  notifyEmail: string;
+
   // Stripe
   stripeEnabled: boolean;
   stripeMode: "test" | "live";
@@ -102,6 +106,9 @@ export const SITE_DEFAULTS: SiteSettings = {
   maintenanceTitle: "We're crafting something special",
   maintenanceMessage:
     "Our website is currently being prepared. We'll be ready to welcome you very soon. In the meantime, feel free to reach out for catering inquiries.",
+
+  resendApiKey: "",
+  notifyEmail: "",
 
   stripeEnabled: false,
   stripeMode: "test",
@@ -174,6 +181,9 @@ export async function getSettings(): Promise<SiteSettings> {
     maintenanceTitle: row.maintenanceTitle,
     maintenanceMessage: row.maintenanceMessage,
 
+    resendApiKey: row.resendApiKey,
+    notifyEmail: row.notifyEmail,
+
     stripeEnabled: row.stripeEnabled,
     stripeMode: (row.stripeMode === "live" ? "live" : "test"),
     stripePublishableKey: row.stripePublishableKey,
@@ -216,6 +226,7 @@ export function toPublicSettings(s: SiteSettings) {
     maintenanceMode: s.maintenanceMode,
     maintenanceTitle: s.maintenanceTitle,
     maintenanceMessage: s.maintenanceMessage,
+    notifyEmail: s.notifyEmail, // safe to expose
     stripeEnabled: s.stripeEnabled,
     stripeMode: s.stripeMode,
     stripePublishableKey: s.stripePublishableKey, // safe to expose

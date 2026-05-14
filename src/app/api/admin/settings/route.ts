@@ -53,6 +53,10 @@ const Body = z.object({
   maintenanceTitle: z.string().max(200).default(""),
   maintenanceMessage: z.string().max(1000).default(""),
 
+  // Email
+  resendApiKey: z.string().max(200).default(""),
+  notifyEmail: z.string().max(160).default(""),
+
   // Stripe
   stripeEnabled: z.boolean().default(false),
   stripeMode: z.enum(["test", "live"]).default("test"),
@@ -107,6 +111,8 @@ export async function PATCH(req: NextRequest) {
       maintenanceMode: data.maintenanceMode,
       maintenanceTitle: data.maintenanceTitle || "We're crafting something special",
       maintenanceMessage: data.maintenanceMessage || "Our website is currently being prepared. We'll be ready to welcome you very soon.",
+      resendApiKey: data.resendApiKey,
+      notifyEmail: data.notifyEmail,
       stripeEnabled: data.stripeEnabled,
       stripeMode: data.stripeMode,
       stripePublishableKey: data.stripePublishableKey,
@@ -118,10 +124,15 @@ export async function PATCH(req: NextRequest) {
       update: payload,
       create: { id: "default", ...payload },
     });
-    // Never echo back secret key
+    // Never echo back secret keys
     return NextResponse.json({
       ok: true,
-      settings: { ...updated, stripeSecretKey: updated.stripeSecretKey ? "***" : "", stripeWebhookSecret: updated.stripeWebhookSecret ? "***" : "" },
+      settings: {
+        ...updated,
+        stripeSecretKey: updated.stripeSecretKey ? "***" : "",
+        stripeWebhookSecret: updated.stripeWebhookSecret ? "***" : "",
+        resendApiKey: updated.resendApiKey ? "***" : "",
+      },
     });
   } catch (err) {
     if (err instanceof z.ZodError) {

@@ -2,12 +2,13 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { ShoppingBag, CalendarCheck, Utensils, LayoutDashboard, Settings, MessageSquare } from "lucide-react";
+import { ShoppingBag, CalendarCheck, Utensils, LayoutDashboard, Settings, MessageSquare, Inbox } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/catering", label: "Catering", icon: CalendarCheck },
+  { href: "/admin/messages", label: "Messages", icon: Inbox },
   { href: "/admin/menu", label: "Menu", icon: Utensils },
   { href: "/admin/testimonials", label: "Testimonials", icon: MessageSquare },
   { href: "/admin/settings", label: "Settings", icon: Settings },

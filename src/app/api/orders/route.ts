@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getSettings } from "@/lib/settings";
 import { createStripeCheckoutSession } from "@/lib/stripe";
+import { notifyNewOrder } from "@/lib/email";
 
 const Topping = z.object({
   id: z.string(),
@@ -138,6 +139,9 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`[Order] ${orderNumber} from ${data.email}, total ${total}`);
+
+    // Fire-and-forget admin notification
+    notifyNewOrder(settings, order).catch((err) => console.error("[Order email] failed", err));
 
     return NextResponse.json({ ok: true, orderNumber: order.orderNumber, id: order.id });
   } catch (err) {

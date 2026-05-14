@@ -13,7 +13,7 @@ import {
 } from "@/lib/enums";
 import type { OrderStatus, RequestStatus, EventType } from "@/lib/enums";
 import { LogoutButton } from "./LogoutButton";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, UserCog } from "lucide-react";
 import { dict } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
 
@@ -50,7 +50,10 @@ export default async function AccountPage() {
           </h1>
           <p className="text-cream/65 text-sm mt-1">{session.user.email}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Link href="/account/profile" className="btn-outline-gold">
+            <UserCog className="w-4 h-4" /> {lang === "vn" ? "Hồ sơ" : "Profile"}
+          </Link>
           {isAdmin && (
             <Link href="/admin" className="btn-outline-gold">
               <LayoutDashboard className="w-4 h-4" /> {t.accountAdmin}
